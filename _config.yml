@@ -24,9 +24,9 @@ author:
   avatar           : "profile.png"
   name             : "Farzad Shami"
   pronouns         : # example: "she/her"  
-  bio              : "M.Sc student in Computer Engineering (web information & data engineering) @ Unipd"
+  bio              : "M.Sc student in CE (Web Information & Data Engineering) @ Unipd"
   location         : "Padua, Italy"
-  employer         : "University of Padua"
+  employer         : # URL
   uri              : # URL
   email            : "farzad.shami@studenti.unipd.it" 
 
