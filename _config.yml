@@ -22,13 +22,13 @@ repository               : "fuzsh/fuzsh.github.io"
 author:
   # Biographic information
   avatar           : "profile.png"
-  name             : "Your Sidebar Name"
+  name             : "Farzad Shami"
   pronouns         : # example: "she/her"  
-  bio              : "Short biography for the left-hand sidebar"
-  location         : "Earth"
-  employer         : "Red Brick University"
+  bio              : "M.Sc student in Computer Engineering @ Unipd"
+  location         : "Padua, Italy"
+  employer         : "University of Padua"
   uri              : # URL
-  email            : "none@example.org" 
+  email            : "farzad.shami@studenti.unipd.it" 
 
   # Academic websites
   arxiv            : # URL - Update with the correct link to your profile
@@ -48,7 +48,7 @@ author:
   stackoverflow    : # User number or user number and name (i.e., use "1" or "1/jeff-atwood")    
 
   # Social media
-  bluesky          : "bsky.app" # Replace this with you Bluesky username
+  bluesky          : # Username
   facebook         : # Username
   flickr           : # Username
   foursquare       : # Username
@@ -57,7 +57,7 @@ author:
   keybase          : # Username
   instagram        : # Username
   lastfm           : # Username
-  linkedin         : # Username
+  linkedin         : "farzad-shami"
   mastodon         : # URL
   medium           : # URL
   pinterest        : # Username
@@ -65,7 +65,7 @@ author:
   steam            : # Username
   telegram         : # URL
   tumblr           : # Username
-  twitter          : # Username for X / Twitter
+  twitter          : "0xFarzad"
   vine             : # Username
   weibo            : # Username
   wikipedia        : # Username
