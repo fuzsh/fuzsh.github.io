@@ -1,7 +1,169 @@
 ---
 layout: default
 ---
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f6;
+        }
 
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+        }
+
+        .main-content {
+            width: 70%;
+        }
+
+        .sidebar {
+            width: 30%;
+            margin-left: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .tags {
+            margin-top: 10px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 10px;
+            margin-right: 10px;
+            border-radius: 20px;
+            background-color: #E6F4F1;
+            color: #4CAF50;
+            font-size: 14px;
+        }
+
+        .document-content {
+            margin-top: 40px;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .note {
+            background-color: #f1f1f1;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #4CAF50;
+            color: #333;
+        }
+
+        .linked-docs {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .linked-docs h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .linked-doc {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #4CAF50;
+            cursor: pointer;
+        }
+
+        .contributors {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .contributors h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .contributor {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .contributor img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .contributor-name {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .publish-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .comment {
+            background-color: #F5F8FA;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .comment p {
+            margin: 0;
+        }
+
+        .comment .avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #D8D8D8;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+    </style>
 {% include base_path %}
 
 {% if page.header.overlay_color or page.header.overlay_image or page.header.image %}
@@ -23,73 +185,74 @@ layout: default
     {% if page.date %}<meta itemprop="datePublished" content="{{ page.date | date: "%B %d, %Y" }}">{% endif %}
     {% if page.modified %}<meta itemprop="dateModified" content="{{ page.modified | date: "%B %d, %Y" }}">{% endif %}
 
-    <div class="page__inner-wrap">
-      {% unless page.header.overlay_color or page.header.overlay_image %}
-        <header>
-          {% if page.title %}<h1 class="page__title" itemprop="headline">{{ page.title | markdownify | remove: "<p>" | remove: "</p>" }}</h1>{% endif %}
-          {% if page.read_time %}
-            <p class="page__meta"><i class="fa fa-clock-o" aria-hidden="true"></i> {% include read-time.html %}</p>
-          {% endif %}
-        {% if page.modified %}
-          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> {{ site.data.ui-text[site.locale].date_label | default: "Published:" }}</strong> <time datetime="{{ page.modified | date: "%Y-%m-%d" }}">{{ page.modified | date: "%B %d, %Y" }}</time></p>
-        {% endif %}
-        
-        {% if page.collection == 'teaching' %}
-          <p> {{ page.type }}, <i>{{ page.venue }}</i>, {{ page.date | default: "1900-01-01" | date: "%Y" }} </p>
-        {% elsif page.venue and page.date %}
-          <p>Published in <i>{{ page.venue }}</i>, {{ page.date | default: "1900-01-01" | date: "%Y" }} </p>
-        {% elsif page.date %}
-          <p class="page__date"><strong><i class="fa fa-fw fa-calendar" aria-hidden="true"></i> {{ site.data.ui-text[site.locale].date_label | default: "Published:" }}</strong> <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | default: "1900-01-01" | date: "%B %d, %Y" }}</time></p>
-        {% endif %}    
-        </header>
-      {% endunless %}
-
-      <section class="page__content" itemprop="text">
-        {{ content }}
-
-        {% if page.citation and page.paperurl and page.slidesurl %}
-          <p style="font-size: smaller">Recommended citation: {{ page.citation }}<br /><a href="{{ page.paperurl }}">Download Paper</a> | <a href="{{ page.slidesurl }}">Download Slides</a></p>
-        {% elsif page.citation and page.paperurl %}
-          <p style="font-size: smaller">Recommended citation: {{ page.citation }}<br /><a href="{{ page.paperurl }}">Download Paper</a></p>
-        {% elsif page.citation and page.slidesurl %}
-          <p style="font-size: smaller">Recommended citation: {{ page.citation }}<br /><a href="{{ page.slidesurl }}">Download Slides</a></p>
-        {% elsif page.citation %}
-          <p style="font-size: smaller">Recommended citation: {{ page.citation }}</p>
-        {% elsif page.slidesurl %}
-          <p style="font-size: smaller"><a href="{{ page.slidesurl }}">Download Slides</a></p>
-        {% endif %}
-
-        {% if page.link %}<div><a href="{{ page.link }}" class="btn">{{ site.data.ui-text[site.locale].ext_link_label | default: "Direct Link" }}</a></div>{% endif %}
-      </section>
-
-      <footer class="page__meta">
-        {% if site.data.ui-text[site.locale].meta_label %}
-          <h4 class="page__meta-title">{{ site.data.ui-text[site.locale].meta_label }}</h4>
-        {% endif %}
-        {% include page__taxonomy.html %}
-      </footer>
-
-      {% if page.share %}{% include social-share.html %}{% endif %}
-
-      {% include post_pagination.html %}
+    <div class="top-bar">
+        <div class="left">
+            <span>Work / Reviews /</span> <strong>My Review Document</strong>
+        </div>
+        <button class="publish-btn">Publish</button>
     </div>
 
-    {% if site.comments.provider and page.comments %}
-      {% include comments.html %}
-    {% endif %}
-  </article>
+    <div class="container">
+        <div class="main-content">
+            <div class="header">
+                <div class="header-left">
+                    <h1>My Review Document</h1>
+                </div>
+            </div>
+            
+            <div class="tags">
+                <span class="tag">Document Tag</span>
+                <span class="tag">Notes</span>
+                <span class="tag">Review Doc</span>
+            </div>
 
-  {% comment %}<!-- only show related on a post page when not disabled -->{% endcomment %}
-  {% if page.id and page.related and site.related_posts.size > 0 %}
-    <div class="page__related">
-      {% if site.data.ui-text[site.locale].related_label %}
-        <h4 class="page__related-title">{{ site.data.ui-text[site.locale].related_label | default: "You May Also Enjoy" }}</h4>
-      {% endif %}
-      <div class="grid__wrapper">
-        {% for post in site.related_posts limit:4 %}
-          {% include archive-single.html type="grid" %}
-        {% endfor %}
-      </div>
+            <div class="document-content">
+                <h2>Sub Title here</h2>
+                <p>
+                    Design Thinking: Design, at its core, is about solving problems and enhancing user experiences. 
+                    Design thinking, a human-centered approach, emphasizes empathy, collaboration, and prototyping to create 
+                    products that truly resonate with users. Technology, with its power to collect and analyze data, complements 
+                    this process by providing valuable insights into user behavior and preferences. 
+                    The design-thinking process, when fueled by technology, leads to more intuitive, user-friendly, and aesthetically pleasing products.
+                </p>
+
+                <div class="note">
+                    <strong>Note:</strong> In today’s fast-paced and ever-evolving world, the fusion of design and technology plays a pivotal role in shaping the products we use daily. From smartphones to automobiles, this synergy has transformed the way we interact with and experience the world around us.
+                </div>
+
+                <div class="comment">
+                    <div class="avatar"></div>
+                    <p><strong>Beth Lemke</strong> 3:45pm<br>Hey! Just wanted to let you know that there is some new ideas re: harding.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="linked-docs">
+                <h3>Linked Docs</h3>
+                <div class="linked-doc">Name_of_document_here.pdf</div>
+                <div class="linked-doc">Name_of_another_thing_here.pdf</div>
+            </div>
+
+            <div class="contributors">
+                <h3>Contributors</h3>
+                <div class="contributor">
+                    <img src="https://via.placeholder.com/40" alt="Contributor Image">
+                    <div class="contributor-name">Beth Lemke</div>
+                </div>
+                <div class="contributor">
+                    <img src="https://via.placeholder.com/40" alt="Contributor Image">
+                    <div class="contributor-name">Brittany Fisher</div>
+                </div>
+                <div class="contributor">
+                    <img src="https://via.placeholder.com/40" alt="Contributor Image">
+                    <div class="contributor-name">Gertrude Gottlieb Jr.</div>
+                </div>
+                <div class="contributor">
+                    <img src="https://via.placeholder.com/40" alt="Contributor Image">
+                    <div class="contributor-name">Alfredo Prosacco</div>
+                </div>
+            </div>
+        </div>
     </div>
-  {% endif %}
 </div>
