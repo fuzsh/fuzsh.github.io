@@ -81,6 +81,10 @@ publication_category:
     title: 'Journal Articles'    
   conferences:
     title: 'Conference Papers'
+    
+paperworks_category:
+  course:
+    title: 'Courses'
 
 # Site Settings
 teaser                   :  # filename of teaser fallback teaser image placed in /images/, .e.g. "500x300.png"
@@ -215,6 +219,9 @@ collections:
   publications:
     output: true
     permalink: /:collection/:path/
+  paperworks:
+    output: true
+    permalink: /:collection/:path/
   portfolio:
     output: true
     permalink: /:collection/:path/
@@ -256,6 +263,15 @@ defaults:
   - scope:
       path: ""
       type: publications
+    values:
+      layout: single
+      author_profile: true
+      share: true
+      comments: true
+  # _paperworks
+  - scope:
+      path: ""
+      type: paperworks
     values:
       layout: single
       author_profile: true
