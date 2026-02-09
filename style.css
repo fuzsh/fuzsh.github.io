@@ -244,3 +244,96 @@ center {
     text-align: center;
     padding: 20px;
 }
+
+/* Paper card styling */
+.paper-card {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f8f8f8;
+    border: 2px ridge #808080;
+    transition: background-color 0.2s;
+}
+
+.paper-card:hover {
+    background-color: #eef0ff;
+}
+
+.paper-image {
+    flex-shrink: 0;
+    width: 200px;
+}
+
+.paper-image img {
+    width: 200px;
+    height: 120px;
+    object-fit: cover;
+    border: 2px solid #808080;
+    background-color: #e0e0e0;
+}
+
+.paper-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.paper-title {
+    font-weight: bold;
+    font-size: 1.05em;
+    color: #000080;
+    margin-bottom: 4px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.paper-authors {
+    font-style: italic;
+    color: #333;
+    margin-bottom: 3px;
+    font-size: 0.95em;
+}
+
+.paper-authors u {
+    font-style: italic;
+}
+
+.paper-venue {
+    color: #008000;
+    margin-bottom: 6px;
+    font-size: 0.95em;
+}
+
+.paper-links {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.9em;
+}
+
+.paper-links a {
+    color: #0000ff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.paper-links a:hover {
+    color: #ff0000;
+    background-color: #ffff00;
+    text-decoration: underline;
+}
+
+/* Responsive paper cards */
+@media (max-width: 768px) {
+    .paper-card {
+        flex-direction: column;
+    }
+
+    .paper-image {
+        width: 100%;
+        text-align: center;
+    }
+
+    .paper-image img {
+        width: 100%;
+        max-width: 280px;
+        height: auto;
+    }
+}
