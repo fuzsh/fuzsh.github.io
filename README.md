@@ -2,14 +2,6 @@
 
 A nostalgic, 90s-style academic portfolio website featuring classic web design elements from the golden age of the internet! Now powered by Jekyll for easy maintenance and GitHub Pages deployment.
 
-## 🚀 Features
-
-- **Jekyll-powered**: Static site generator for easy content management
-- **Component-based**: Reusable header, footer, and sidebar components
-- **Organized structure**: Clean separation of styles, images, and files
-- **GitHub Pages ready**: Automatic deployment on push
-- **90s retro aesthetic**: Maintained the classic web design charm
-
 ## 📁 Directory Structure
 
 ```
