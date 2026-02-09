@@ -4,23 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% if page.title %}{{ page.title }} - {% endif %}{{ site.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans+Extra+Condensed:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ site.baseurl }}/css/style.css">
 </head>
 <body>
     {% include header.html %}
 
     <!-- Main content area -->
-    <table width="100%" border="0" cellpadding="10" cellspacing="0">
-        <tr>
-            <td width="20%" valign="top">
-                {% include sidebar.html show_contact=page.show_contact %}
-            </td>
+    <div class="page-container">
+        <div class="sidebar-wrapper">
+            {% include sidebar.html show_contact=page.show_contact %}
+        </div>
 
-            <td width="80%" valign="top">
-                {{ content }}
-            </td>
-        </tr>
-    </table>
+        <div class="content-wrapper">
+            {{ content }}
+        </div>
+    </div>
 
     {% include footer.html %}
 </body>
