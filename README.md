@@ -1,6 +1,8 @@
 # Farzad Shami's 90s Style Academic Portfolio
 
-A nostalgic, 90s-style academic portfolio website featuring classic web design elements from the golden age of the internet! Now powered by Jekyll for easy maintenance and GitHub Pages deployment.
+A nostalgic, 90s-style academic portfolio website featuring classic web design elements from the golden age of the internet! 
+
+Powered by Jekyll for easy maintenance and GitHub Pages deployment.
 
 ## 📁 Directory Structure
 
