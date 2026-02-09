@@ -1,155 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farzad Shami - Academic Portfolio</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <!-- Classic 90s header with marquee -->
-    <div class="header">
-        <h1>🎓 Farzad Shami's Academic Portfolio 🎓</h1>
-        <marquee behavior="scroll" direction="left" scrollamount="5">
-            Welcome to my academic homepage! · PhD Student at Aalto University · Research on Multimodal LLMs for Geospatial Reasoning · Updated: February 2026
-        </marquee>
+---
+layout: default
+title: Home
+show_contact: true
+---
+
+<!-- About Section -->
+<div id="about" class="section">
+    <h2>👤 About Me</h2>
+    <hr>
+    <p>
+        Welcome to my academic homepage! I am a 1st year PhD student in Computer Engineering at
+        <a href="https://www.aalto.fi/en" target="_blank">Aalto University</a> (GIST Lab), Helsinki, Finland,
+        under the supervision of <strong>Prof. H. Tenkanen</strong> and <strong>N. Van de Weghe</strong>.
+    </p>
+    <p>
+        <strong>Research Focus:</strong> Multimodal Large Language Models (LLMs) for Geospatial Reasoning.
+    </p>
+    <p>
+        <strong>Current Project:</strong> <em>Geo-R2LLM</em> &ndash; Knowledgeable and Interpretable multimodal Geographic LLMs
+        Grounded with Reasoning and Retrieval, funded under the CHIST-ERA transnational call 2023.
+    </p>
+    <p>
+        <strong>Research Interests:</strong> Large Language Models, Knowledge Graphs, Fact Verification,
+        Geospatial Reasoning, Information Retrieval, Multi-Agent Systems.
+    </p>
+    <p>
+        I previously completed my M.S. in Computer Engineering at the
+        <a href="https://www.unipd.it/en/" target="_blank">University of Padova</a> (GPA: 110/110),
+        where I worked on LLM-based Fact Verification for Knowledge Graphs under the supervision of
+        <strong>Prof. G. Silvello</strong> and <strong>S. Marchesin</strong>.
+    </p>
+</div>
+
+<!-- News Section -->
+<div id="news" class="section">
+    <h2>📰 News & Updates</h2>
+    <hr>
+    <div class="news-scrollable">
+        <table border="1" cellpadding="5" cellspacing="0" width="100%">
+            <tr bgcolor="#e0e0e0">
+                <th width="20%">Date</th>
+                <th width="80%">News</th>
+            </tr>
+            <tr>
+                <td><strong>2026</strong></td>
+                <td>📄 New preprint: <em>GROKE: Vision-Free Navigation Instruction Evaluation via Graph Reasoning on OSM</em> on arXiv!</td>
+            </tr>
+            <tr bgcolor="#f5f5f5">
+                <td><strong>2026</strong></td>
+                <td>🎉 Paper accepted at <strong>ECIR 2026</strong>: <em>From Single to Multi-Agent Reasoning: Advancing GeneGPT for Genomics QA</em></td>
+            </tr>
+            <tr>
+                <td><strong>2026</strong></td>
+                <td>🎉 Paper accepted at <strong>EDBT 2026</strong>: <em>Benchmarking Large Language Models for Knowledge Graph Validation</em></td>
+            </tr>
+            <tr bgcolor="#f5f5f5">
+                <td><strong>Jul 2025</strong></td>
+                <td>🎓 Started PhD at <strong>Aalto University</strong>, Helsinki, Finland!</td>
+            </tr>
+            <tr>
+                <td><strong>2025</strong></td>
+                <td>🎉 Two papers accepted at <strong>SIGIR 2025</strong>!</td>
+            </tr>
+        </table>
     </div>
-
-    <!-- Classic 90s navigation bar -->
-    <div class="navbar">
-        <a href="index.html">Home</a> |
-        <a href="publications.html">Publications</a> |
-        <a href="experience.html">Experience</a> |
-        <a href="cv.html">CV/Resume</a> |
-        <a href="contact.html">Contact</a>
-    </div>
-
-    <!-- Main content area -->
-    <table width="100%" border="0" cellpadding="10" cellspacing="0">
-        <tr>
-            <td width="20%" valign="top">
-                <!-- Left sidebar with photo and quick links -->
-                <div class="sidebar">
-                    <h3>📸 Photo</h3>
-                    <img src="static/photo.jpg" alt="Farzad Shami" class="profile-photo"
-                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22250%22%3E%3Crect fill=%22%23cccccc%22 width=%22200%22 height=%22250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2218%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23666%22%3EFarzad Shami%3C/text%3E%3C/svg%3E'">
-
-                    <h3>📧 Quick Contact</h3>
-                    <p>
-                        <strong>Email:</strong><br>
-                        <a href="mailto:farzad.shami@aalto.fi">farzad.shami@aalto.fi</a>
-                    </p>
-                    <p>
-                        <strong>Location:</strong><br>
-                        Helsinki, Finland
-                    </p>
-                    <p>
-                        <strong>Phone:</strong><br>
-                        (+358) 50-571-1821
-                    </p>
-
-                    <h3>🔗 Quick Links</h3>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="publications.html">Publications</a></li>
-                        <li><a href="experience.html">Experience</a></li>
-                        <li><a href="cv.html">CV/Resume</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                        <li><a href="cv.pdf" target="_blank">Download CV (PDF)</a></li>
-                        <li><a href="https://scholar.google.com/citations?hl=en&user=DYpHnYgAAAAJ" target="_blank">Google Scholar</a></li>
-                        <li><a href="https://github.com/fuzsh" target="_blank">GitHub (fuzsh)</a></li>
-                        <li><a href="https://linkedin.com/in/farzad-shami" target="_blank">LinkedIn</a></li>
-                    </ul>
-                </div>
-            </td>
-
-            <td width="80%" valign="top">
-                <!-- Main content area -->
-
-                <!-- About Section -->
-                <div id="about" class="section">
-                    <h2>👤 About Me</h2>
-                    <hr>
-                    <p>
-                        Welcome to my academic homepage! I am a 1st year PhD student in Computer Engineering at
-                        <a href="https://www.aalto.fi/en" target="_blank">Aalto University</a> (GIST Lab), Helsinki, Finland,
-                        under the supervision of <strong>Prof. H. Tenkanen</strong> and <strong>N. Van de Weghe</strong>.
-                    </p>
-                    <p>
-                        <strong>Research Focus:</strong> Multimodal Large Language Models (LLMs) for Geospatial Reasoning.
-                    </p>
-                    <p>
-                        <strong>Current Project:</strong> <em>Geo-R2LLM</em> &ndash; Knowledgeable and Interpretable multimodal Geographic LLMs
-                        Grounded with Reasoning and Retrieval, funded under the CHIST-ERA transnational call 2023.
-                    </p>
-                    <p>
-                        <strong>Research Interests:</strong> Large Language Models, Knowledge Graphs, Fact Verification,
-                        Geospatial Reasoning, Information Retrieval, Multi-Agent Systems.
-                    </p>
-                    <p>
-                        I previously completed my M.S. in Computer Engineering at the
-                        <a href="https://www.unipd.it/en/" target="_blank">University of Padova</a> (GPA: 110/110),
-                        where I worked on LLM-based Fact Verification for Knowledge Graphs under the supervision of
-                        <strong>Prof. G. Silvello</strong> and <strong>S. Marchesin</strong>.
-                    </p>
-                </div>
-
-                <!-- News Section -->
-                <div id="news" class="section">
-                    <h2>📰 News & Updates</h2>
-                    <hr>
-                    <div class="news-scrollable">
-                        <table border="1" cellpadding="5" cellspacing="0" width="100%">
-                            <tr bgcolor="#e0e0e0">
-                                <th width="20%">Date</th>
-                                <th width="80%">News</th>
-                            </tr>
-                            <tr>
-                                <td><strong>2026</strong></td>
-                                <td>📄 New preprint: <em>GROKE: Vision-Free Navigation Instruction Evaluation via Graph Reasoning on OSM</em> on arXiv!</td>
-                            </tr>
-                            <tr bgcolor="#f5f5f5">
-                                <td><strong>2026</strong></td>
-                                <td>🎉 Paper accepted at <strong>ECIR 2026</strong>: <em>From Single to Multi-Agent Reasoning: Advancing GeneGPT for Genomics QA</em></td>
-                            </tr>
-                            <tr>
-                                <td><strong>2026</strong></td>
-                                <td>🎉 Paper accepted at <strong>EDBT 2026</strong>: <em>Benchmarking Large Language Models for Knowledge Graph Validation</em></td>
-                            </tr>
-                            <tr bgcolor="#f5f5f5">
-                                <td><strong>Jul 2025</strong></td>
-                                <td>🎓 Started PhD at <strong>Aalto University</strong>, Helsinki, Finland!</td>
-                            </tr>
-                            <tr>
-                                <td><strong>2025</strong></td>
-                                <td>🎉 Two papers accepted at <strong>SIGIR 2025</strong>!</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <p><em>Last updated: February 9, 2026</em></p>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- Classic 90s footer -->
-    <div class="footer">
-        <hr>
-        <center>
-            <p>
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='31'%3E%3Crect fill='%23000' width='88' height='31'/%3E%3Ctext x='44' y='20' font-size='12' fill='%23fff' text-anchor='middle'%3EBest viewed%3C/text%3E%3Ctext x='44' y='28' font-size='8' fill='%23fff' text-anchor='middle'%3Ein Netscape%3C/text%3E%3C/svg%3E" alt="Best viewed in Netscape">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='31'%3E%3Crect fill='%23000080' width='88' height='31'/%3E%3Ctext x='44' y='20' font-size='10' fill='%23fff' text-anchor='middle'%3EHTML 4.01%3C/text%3E%3C/svg%3E" alt="HTML 4.01">
-            </p>
-            <p>
-                &copy; 2026 Farzad Shami. All rights reserved.<br>
-                <em>Last updated: February 9, 2026</em>
-            </p>
-            <p>
-                <font size="-1">
-                    This page is best viewed with Internet Explorer 5.0 or Netscape Navigator 4.0 at 800x600 resolution.
-                </font>
-            </p>
-        </center>
-    </div>
-</body>
-</html>
+    <p><em>Last updated: February 9, 2026</em></p>
+</div>

@@ -1,0 +1,29 @@
+# Jekyll Configuration for GitHub Pages
+title: Farzad Shami - Academic Portfolio
+description: PhD Student at Aalto University - Research on Multimodal LLMs for Geospatial Reasoning
+author:
+  name: Farzad Shami
+  email: farzad.shami@aalto.fi
+  location: Helsinki, Finland
+  phone: (+358) 50-571-1821
+
+# Social links
+social:
+  github: fuzsh
+  linkedin: farzad-shami
+  scholar: DYpHnYgAAAAJ
+
+# Build settings
+markdown: kramdown
+permalink: pretty
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+
+# Jekyll defaults
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"

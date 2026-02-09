@@ -1,198 +1,127 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Publications - Farzad Shami</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <!-- Classic 90s header with marquee -->
-    <div class="header">
-        <h1>🎓 Farzad Shami's Academic Portfolio 🎓</h1>
-        <marquee behavior="scroll" direction="left" scrollamount="5">
-            Welcome to my academic homepage! · PhD Student at Aalto University · Research on Multimodal LLMs for Geospatial Reasoning · Updated: February 2026
-        </marquee>
+---
+layout: default
+title: Publications
+show_contact: false
+---
+
+<!-- Publications Section -->
+<div class="section">
+    <h2>📚 Publications</h2>
+    <hr>
+    <p>* denotes equal contribution. See also my <a href="https://scholar.google.com/citations?hl=en&user={{ site.social.scholar }}" target="_blank">Google Scholar</a> profile.</p>
+
+    <!-- Paper 1: GROKE -->
+    <div class="paper-card">
+        <div class="paper-image">
+            <img src="{{ site.baseurl }}/assets/images/groke.png" alt="GROKE paper figure"
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23e8f4e8%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%F0%9F%97%BA%EF%B8%8F GROKE%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3EGraph Reasoning%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3Eon OSM%3C/text%3E%3C/svg%3E'">
+        </div>
+        <div class="paper-info">
+            <div class="paper-title">GROKE: Vision-Free Navigation Instruction Evaluation via Graph Reasoning on OSM</div>
+            <div class="paper-authors">Farzad Shami, Subhrasankha Dey, Nico Van de Weghe, and Henrikki Tenkanen</div>
+            <div class="paper-venue"><strong>arXiv</strong> preprint, 2026</div>
+            <div class="paper-links">
+                [<a href="https://arxiv.org/abs/XXXX.XXXXX" target="_blank">arXiv</a>]
+                [<a href="https://arxiv.org/pdf/XXXX.XXXXX" target="_blank">PDF</a>]
+                [<a href="https://github.com/fuzsh/groke" target="_blank">Code</a>]
+                [<a href="https://huggingface.co/datasets/fuzsh/groke" target="_blank">🤗 Dataset</a>]
+                [<a href="https://fuzsh.github.io/groke" target="_blank">Project Page</a>]
+            </div>
+        </div>
     </div>
 
-    <!-- Classic 90s navigation bar -->
-    <div class="navbar">
-        <a href="index.html">Home</a> |
-        <a href="publications.html">Publications</a> |
-        <a href="experience.html">Experience</a> |
-        <a href="cv.html">CV/Resume</a> |
-        <a href="contact.html">Contact</a>
+    <!-- Paper 2: GeneGPT -->
+    <div class="paper-card">
+        <div class="paper-image">
+            <img src="{{ site.baseurl }}/assets/images/genegpt.png" alt="GeneGPT paper figure"
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23e8e8f4%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%F0%9F%A7%AC GeneGPT%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3EMulti-Agent Reasoning%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3Efor Genomics QA%3C/text%3E%3C/svg%3E'">
+        </div>
+        <div class="paper-info">
+            <div class="paper-title">From Single to Multi-Agent Reasoning: Advancing GeneGPT for Genomics QA</div>
+            <div class="paper-authors">Kimia Abedini, <u>Farzad Shami</u>, and Gianmaria Silvello</div>
+            <div class="paper-venue"><strong>ECIR</strong> 2026 &ndash; European Conference on Information Retrieval</div>
+            <div class="paper-links">
+                [<a href="#" target="_blank">PDF</a>]
+                [<a href="#" target="_blank">arXiv</a>]
+                [<a href="https://github.com/fuzsh/genegpt-multi-agent" target="_blank">Code</a>]
+                [<a href="https://huggingface.co/datasets/fuzsh/genomics-qa" target="_blank">🤗 Dataset</a>]
+            </div>
+        </div>
     </div>
 
-    <!-- Main content area -->
-    <table width="100%" border="0" cellpadding="10" cellspacing="0">
-        <tr>
-            <td width="20%" valign="top">
-                <!-- Left sidebar with photo and quick links -->
-                <div class="sidebar">
-                    <h3>📸 Photo</h3>
-                    <img src="static/photo.jpg" alt="Farzad Shami" class="profile-photo"
-                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22250%22%3E%3Crect fill=%22%23cccccc%22 width=%22200%22 height=%22250%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2218%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23666%22%3EFarzad Shami%3C/text%3E%3C/svg%3E'">
-
-                    <h3>🔗 Quick Links</h3>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="publications.html">Publications</a></li>
-                        <li><a href="experience.html">Experience</a></li>
-                        <li><a href="cv.html">CV/Resume</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                        <li><a href="cv.pdf" target="_blank">Download CV (PDF)</a></li>
-                        <li><a href="https://scholar.google.com/citations?hl=en&user=DYpHnYgAAAAJ" target="_blank">Google Scholar</a></li>
-                        <li><a href="https://github.com/fuzsh" target="_blank">GitHub (fuzsh)</a></li>
-                        <li><a href="https://linkedin.com/in/farzad-shami" target="_blank">LinkedIn</a></li>
-                    </ul>
-                </div>
-            </td>
-
-            <td width="80%" valign="top">
-                <!-- Publications Section -->
-                <div class="section">
-                    <h2>📚 Publications</h2>
-                    <hr>
-                    <p>* denotes equal contribution. See also my <a href="https://scholar.google.com/citations?hl=en&user=DYpHnYgAAAAJ" target="_blank">Google Scholar</a> profile.</p>
-
-                    <!-- Paper 1: GROKE -->
-                    <div class="paper-card">
-                        <div class="paper-image">
-                            <img src="images/groke.png" alt="GROKE paper figure"
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23e8f4e8%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%F0%9F%97%BA%EF%B8%8F GROKE%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3EGraph Reasoning%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3Eon OSM%3C/text%3E%3C/svg%3E'">
-                        </div>
-                        <div class="paper-info">
-                            <div class="paper-title">GROKE: Vision-Free Navigation Instruction Evaluation via Graph Reasoning on OSM</div>
-                            <div class="paper-authors">Farzad Shami, Subhrasankha Dey, Nico Van de Weghe, and Henrikki Tenkanen</div>
-                            <div class="paper-venue"><strong>arXiv</strong> preprint, 2026</div>
-                            <div class="paper-links">
-                                [<a href="https://arxiv.org/abs/XXXX.XXXXX" target="_blank">arXiv</a>]
-                                [<a href="https://arxiv.org/pdf/XXXX.XXXXX" target="_blank">PDF</a>]
-                                [<a href="https://github.com/fuzsh/groke" target="_blank">Code</a>]
-                                [<a href="https://huggingface.co/datasets/fuzsh/groke" target="_blank">🤗 Dataset</a>]
-                                [<a href="https://fuzsh.github.io/groke" target="_blank">Project Page</a>]
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Paper 2: GeneGPT -->
-                    <div class="paper-card">
-                        <div class="paper-image">
-                            <img src="images/genegpt.png" alt="GeneGPT paper figure"
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23e8e8f4%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%F0%9F%A7%AC GeneGPT%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3EMulti-Agent Reasoning%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3Efor Genomics QA%3C/text%3E%3C/svg%3E'">
-                        </div>
-                        <div class="paper-info">
-                            <div class="paper-title">From Single to Multi-Agent Reasoning: Advancing GeneGPT for Genomics QA</div>
-                            <div class="paper-authors">Kimia Abedini, <u>Farzad Shami</u>, and Gianmaria Silvello</div>
-                            <div class="paper-venue"><strong>ECIR</strong> 2026 &ndash; European Conference on Information Retrieval</div>
-                            <div class="paper-links">
-                                [<a href="#" target="_blank">PDF</a>]
-                                [<a href="#" target="_blank">arXiv</a>]
-                                [<a href="https://github.com/fuzsh/genegpt-multi-agent" target="_blank">Code</a>]
-                                [<a href="https://huggingface.co/datasets/fuzsh/genomics-qa" target="_blank">🤗 Dataset</a>]
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Paper 3: Benchmarking LLMs for KG Validation -->
-                    <div class="paper-card">
-                        <div class="paper-image">
-                            <img src="images/benchmarking-kg.png" alt="Benchmarking KG paper figure"
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23f4e8e8%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%F0%9F%93%8A Benchmarking%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3ELLMs for KG%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3EValidation%3C/text%3E%3C/svg%3E'">
-                        </div>
-                        <div class="paper-info">
-                            <div class="paper-title">Benchmarking Large Language Models for Knowledge Graph Validation</div>
-                            <div class="paper-authors"><u>Farzad Shami</u>*, Stefano Marchesin, and Gianmaria Silvello</div>
-                            <div class="paper-venue"><strong>EDBT</strong> 2026 &ndash; International Conference on Extending Database Technology</div>
-                            <div class="paper-links">
-                                [<a href="#" target="_blank">PDF</a>]
-                                [<a href="#" target="_blank">arXiv</a>]
-                                [<a href="https://github.com/fuzsh/llm-kg-benchmark" target="_blank">Code</a>]
-                                [<a href="https://huggingface.co/datasets/fuzsh/kg-validation-benchmark" target="_blank">🤗 Benchmark</a>]
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Paper 4: Fact Verification in KGs -->
-                    <div class="paper-card">
-                        <div class="paper-image">
-                            <img src="images/fact-verification.png" alt="Fact Verification paper figure"
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23f4f4e8%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%E2%9C%85 Fact Verification%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3Ein Knowledge Graphs%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3EUsing LLMs%3C/text%3E%3C/svg%3E'">
-                        </div>
-                        <div class="paper-info">
-                            <div class="paper-title">Fact Verification in Knowledge Graphs Using LLMs</div>
-                            <div class="paper-authors"><u>Farzad Shami</u>*, Stefano Marchesin, and Gianmaria Silvello</div>
-                            <div class="paper-venue"><strong>SIGIR</strong> 2025 &ndash; ACM SIGIR Conference on Research and Development in Information Retrieval</div>
-                            <div class="paper-links">
-                                [<a href="#" target="_blank">PDF</a>]
-                                [<a href="#" target="_blank">arXiv</a>]
-                                [<a href="https://github.com/fuzsh/fact-verification-kg" target="_blank">Code</a>]
-                                [<a href="https://huggingface.co/datasets/fuzsh/kg-fact-verification" target="_blank">🤗 Dataset</a>]
-                                [<a href="#" target="_blank">Poster</a>]
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Paper 5: Doctron -->
-                    <div class="paper-card">
-                        <div class="paper-image">
-                            <img src="images/doctron.png" alt="Doctron paper figure"
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23e8f0f4%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%F0%9F%96%8A%EF%B8%8F Doctron%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3ECollaborative Annotation%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3ETool for IR%3C/text%3E%3C/svg%3E'">
-                        </div>
-                        <div class="paper-info">
-                            <div class="paper-title">Doctron: A Web-based Collaborative Annotation Tool for Ground Truth Creation in IR</div>
-                            <div class="paper-authors">Ornella Irrera, Stefano Marchesin, <u>Farzad Shami</u>, and Gianmaria Silvello</div>
-                            <div class="paper-venue"><strong>SIGIR</strong> 2025 &ndash; ACM SIGIR Conference on Research and Development in Information Retrieval</div>
-                            <div class="paper-links">
-                                [<a href="#" target="_blank">PDF</a>]
-                                [<a href="https://github.com/fuzsh/doctron" target="_blank">Code</a>]
-                                [<a href="#" target="_blank">Demo</a>]
-                                [<a href="#" target="_blank">Video</a>]
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Paper 6: SEUPD@CLEF -->
-                    <div class="paper-card">
-                        <div class="paper-image">
-                            <img src="images/seupd-clef.png" alt="SEUPD@CLEF paper figure"
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23f0e8f4%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%F0%9F%8F%86 SEUPD%40CLEF%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3ETemporal Persistence%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3Eof IR Systems%3C/text%3E%3C/svg%3E'">
-                        </div>
-                        <div class="paper-info">
-                            <div class="paper-title">SEUPD@CLEF: Team CLOSE on temporal persistence of IR systems' performance</div>
-                            <div class="paper-authors"><u>Farzad Shami</u>, Gianluca Antolini, Nicola Boscolo, Mirco Cazzaro, Marco Martinelli, Reza Safavi, Nicola Ferro</div>
-                            <div class="paper-venue"><strong>CLEF</strong> 2023 &ndash; Conference and Labs of the Evaluation Forum</div>
-                            <div class="paper-links">
-                                [<a href="#" target="_blank">PDF</a>]
-                                [<a href="#" target="_blank">BibTeX</a>]
-                                [<a href="#" target="_blank">Slides</a>]
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- Classic 90s footer -->
-    <div class="footer">
-        <hr>
-        <center>
-            <p>
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='31'%3E%3Crect fill='%23000' width='88' height='31'/%3E%3Ctext x='44' y='20' font-size='12' fill='%23fff' text-anchor='middle'%3EBest viewed%3C/text%3E%3Ctext x='44' y='28' font-size='8' fill='%23fff' text-anchor='middle'%3Ein Netscape%3C/text%3E%3C/svg%3E" alt="Best viewed in Netscape">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='31'%3E%3Crect fill='%23000080' width='88' height='31'/%3E%3Ctext x='44' y='20' font-size='10' fill='%23fff' text-anchor='middle'%3EHTML 4.01%3C/text%3E%3C/svg%3E" alt="HTML 4.01">
-            </p>
-            <p>
-                &copy; 2026 Farzad Shami. All rights reserved.<br>
-                <em>Last updated: February 9, 2026</em>
-            </p>
-            <p>
-                <font size="-1">
-                    This page is best viewed with Internet Explorer 5.0 or Netscape Navigator 4.0 at 800x600 resolution.
-                </font>
-            </p>
-        </center>
+    <!-- Paper 3: Benchmarking LLMs for KG Validation -->
+    <div class="paper-card">
+        <div class="paper-image">
+            <img src="{{ site.baseurl }}/assets/images/benchmarking-kg.png" alt="Benchmarking KG paper figure"
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23f4e8e8%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%F0%9F%93%8A Benchmarking%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3ELLMs for KG%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3EValidation%3C/text%3E%3C/svg%3E'">
+        </div>
+        <div class="paper-info">
+            <div class="paper-title">Benchmarking Large Language Models for Knowledge Graph Validation</div>
+            <div class="paper-authors"><u>Farzad Shami</u>*, Stefano Marchesin, and Gianmaria Silvello</div>
+            <div class="paper-venue"><strong>EDBT</strong> 2026 &ndash; International Conference on Extending Database Technology</div>
+            <div class="paper-links">
+                [<a href="#" target="_blank">PDF</a>]
+                [<a href="#" target="_blank">arXiv</a>]
+                [<a href="https://github.com/fuzsh/llm-kg-benchmark" target="_blank">Code</a>]
+                [<a href="https://huggingface.co/datasets/fuzsh/kg-validation-benchmark" target="_blank">🤗 Benchmark</a>]
+            </div>
+        </div>
     </div>
-</body>
-</html>
+
+    <!-- Paper 4: Fact Verification in KGs -->
+    <div class="paper-card">
+        <div class="paper-image">
+            <img src="{{ site.baseurl }}/assets/images/fact-verification.png" alt="Fact Verification paper figure"
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23f4f4e8%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%E2%9C%85 Fact Verification%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3Ein Knowledge Graphs%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3EUsing LLMs%3C/text%3E%3C/svg%3E'">
+        </div>
+        <div class="paper-info">
+            <div class="paper-title">Fact Verification in Knowledge Graphs Using LLMs</div>
+            <div class="paper-authors"><u>Farzad Shami</u>*, Stefano Marchesin, and Gianmaria Silvello</div>
+            <div class="paper-venue"><strong>SIGIR</strong> 2025 &ndash; ACM SIGIR Conference on Research and Development in Information Retrieval</div>
+            <div class="paper-links">
+                [<a href="#" target="_blank">PDF</a>]
+                [<a href="#" target="_blank">arXiv</a>]
+                [<a href="https://github.com/fuzsh/fact-verification-kg" target="_blank">Code</a>]
+                [<a href="https://huggingface.co/datasets/fuzsh/kg-fact-verification" target="_blank">🤗 Dataset</a>]
+                [<a href="#" target="_blank">Poster</a>]
+            </div>
+        </div>
+    </div>
+
+    <!-- Paper 5: Doctron -->
+    <div class="paper-card">
+        <div class="paper-image">
+            <img src="{{ site.baseurl }}/assets/images/doctron.png" alt="Doctron paper figure"
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23e8f0f4%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%F0%9F%96%8A%EF%B8%8F Doctron%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3ECollaborative Annotation%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3ETool for IR%3C/text%3E%3C/svg%3E'">
+        </div>
+        <div class="paper-info">
+            <div class="paper-title">Doctron: A Web-based Collaborative Annotation Tool for Ground Truth Creation in IR</div>
+            <div class="paper-authors">Ornella Irrera, Stefano Marchesin, <u>Farzad Shami</u>, and Gianmaria Silvello</div>
+            <div class="paper-venue"><strong>SIGIR</strong> 2025 &ndash; ACM SIGIR Conference on Research and Development in Information Retrieval</div>
+            <div class="paper-links">
+                [<a href="#" target="_blank">PDF</a>]
+                [<a href="https://github.com/fuzsh/doctron" target="_blank">Code</a>]
+                [<a href="#" target="_blank">Demo</a>]
+                [<a href="#" target="_blank">Video</a>]
+            </div>
+        </div>
+    </div>
+
+    <!-- Paper 6: SEUPD@CLEF -->
+    <div class="paper-card">
+        <div class="paper-image">
+            <img src="{{ site.baseurl }}/assets/images/seupd-clef.png" alt="SEUPD@CLEF paper figure"
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22280%22 height=%22160%22%3E%3Crect fill=%22%23f0e8f4%22 width=%22280%22 height=%22160%22/%3E%3Ctext x=%2250%25%22 y=%2235%25%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23333%22%3E%F0%9F%8F%86 SEUPD%40CLEF%3C/text%3E%3Ctext x=%2250%25%22 y=%2255%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3ETemporal Persistence%3C/text%3E%3Ctext x=%2250%25%22 y=%2270%25%22 font-size=%2211%22 text-anchor=%22middle%22 fill=%22%23666%22%3Eof IR Systems%3C/text%3E%3C/svg%3E'">
+        </div>
+        <div class="paper-info">
+            <div class="paper-title">SEUPD@CLEF: Team CLOSE on temporal persistence of IR systems' performance</div>
+            <div class="paper-authors"><u>Farzad Shami</u>, Gianluca Antolini, Nicola Boscolo, Mirco Cazzaro, Marco Martinelli, Reza Safavi, Nicola Ferro</div>
+            <div class="paper-venue"><strong>CLEF</strong> 2023 &ndash; Conference and Labs of the Evaluation Forum</div>
+            <div class="paper-links">
+                [<a href="#" target="_blank">PDF</a>]
+                [<a href="#" target="_blank">BibTeX</a>]
+                [<a href="#" target="_blank">Slides</a>]
+            </div>
+        </div>
+    </div>
+</div>

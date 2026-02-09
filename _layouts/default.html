@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if page.title %}{{ page.title }} - {% endif %}{{ site.title }}</title>
+    <link rel="stylesheet" href="{{ site.baseurl }}/css/style.css">
+</head>
+<body>
+    {% include header.html %}
+
+    <!-- Main content area -->
+    <table width="100%" border="0" cellpadding="10" cellspacing="0">
+        <tr>
+            <td width="20%" valign="top">
+                {% include sidebar.html show_contact=page.show_contact %}
+            </td>
+
+            <td width="80%" valign="top">
+                {{ content }}
+            </td>
+        </tr>
+    </table>
+
+    {% include footer.html %}
+</body>
+</html>
