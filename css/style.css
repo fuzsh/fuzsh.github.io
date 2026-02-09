@@ -115,7 +115,7 @@ a:hover {
         position: sticky;
         top: 0;
         align-self: flex-start;
-        max-height: calc(100vh - 0px);
+        max-height: 100vh;
         overflow: visible;
     }
     
