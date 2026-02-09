@@ -7,10 +7,11 @@ body {
     color: #000000;
     margin: 0;
     padding: 0;
-    line-height: 1.6;
+    line-height: 1.7;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    font-size: 16px;
 }
 
 /* Header styling */
@@ -160,6 +161,7 @@ a:hover {
     padding: 10px;
     border: 2px solid #000080;
     margin: -20px -20px 15px -20px;
+    font-size: 1.5em;
 }
 
 .section h3 {
@@ -167,6 +169,7 @@ a:hover {
     font-family: Arial, Helvetica, sans-serif;
     border-bottom: 2px dotted #008000;
     padding-bottom: 5px;
+    font-size: 1.2em;
 }
 
 .section hr {
@@ -176,19 +179,29 @@ a:hover {
     margin: 15px 0;
 }
 
+.section p {
+    margin-bottom: 12px;
+    font-size: 1.05em;
+}
+
 /* Tables */
 table {
     border-collapse: collapse;
+    width: 100%;
+    font-size: 0.95em;
 }
 
 table th {
     font-family: Arial, Helvetica, sans-serif;
     font-weight: bold;
     text-align: left;
+    padding: 8px;
 }
 
 table td {
     vertical-align: top;
+    padding: 8px;
+    line-height: 1.5;
 }
 
 /* Lists */
@@ -382,6 +395,15 @@ center {
     overflow-y: auto;
     border: 2px solid #808080;
     margin-bottom: 15px;
+    background-color: #ffffff;
+}
+
+.news-scrollable table {
+    margin: 0;
+}
+
+.news-scrollable table tr:hover {
+    background-color: #ffffcc !important;
 }
 
 .news-scrollable::-webkit-scrollbar {
