@@ -85,6 +85,16 @@ a:hover {
     margin-bottom: 20px;
 }
 
+/* Sticky sidebar for desktop view */
+@media (min-width: 769px) {
+    td[width="20%"] {
+        position: sticky;
+        top: 0;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+}
+
 .sidebar h3 {
     color: #000080;
     border-bottom: 2px solid #000080;
