@@ -15,11 +15,13 @@ social:
 
 # Build settings
 markdown: kramdown
-permalink: pretty
+baseurl: ""
 exclude:
   - README.md
   - Gemfile
   - Gemfile.lock
+  - vendor
+  - .bundle
 
 # Jekyll defaults
 defaults:
