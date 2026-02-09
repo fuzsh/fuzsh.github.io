@@ -241,12 +241,10 @@ ol li {
 /* Strong and emphasis */
 strong {
     color: #000080;
-    font-weight: bold;
 }
 
 em {
     color: #008000;
-    font-style: italic;
 }
 
 /* Center tag support (90s style) */
