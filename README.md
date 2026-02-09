@@ -122,7 +122,7 @@ While maintaining the 90s aesthetic, the site includes basic responsive design f
 ## 🌟 Tips
 
 - Keep the 90s aesthetic by using simple HTML and minimal JavaScript
-- Use emojis to add visual interest (they're period-appropriate for late 90s!)
+- Use emojis sparingly to add visual interest (modern browsers support them well)
 - Update the "Last updated" dates when you make changes
 - Consider adding animated GIFs for that authentic 90s feel
 
