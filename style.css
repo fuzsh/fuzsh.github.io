@@ -337,3 +337,35 @@ center {
         height: auto;
     }
 }
+
+/* Scrollable news section */
+.news-scrollable {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 2px solid #808080;
+    margin-bottom: 15px;
+}
+
+.news-scrollable::-webkit-scrollbar {
+    width: 16px;
+}
+
+.news-scrollable::-webkit-scrollbar-track {
+    background: #d3d3d3;
+    border: 1px solid #808080;
+}
+
+.news-scrollable::-webkit-scrollbar-thumb {
+    background: #808080;
+    border: 1px solid #000000;
+}
+
+.news-scrollable::-webkit-scrollbar-thumb:hover {
+    background: #606060;
+}
+
+/* Firefox scrollbar styling */
+.news-scrollable {
+    scrollbar-width: auto;
+    scrollbar-color: #808080 #d3d3d3;
+}
