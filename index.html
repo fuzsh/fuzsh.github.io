@@ -186,7 +186,7 @@
        of the résumé of <b>Farzad Shami</b> — PhD researcher, Aalto University.</p>
     <div id="keys">
       <span><b>WASD</b> move</span><span><b>MOUSE</b> look</span><span><b>SHIFT</b> sprint</span>
-      <span><b>SPACE</b> jump</span><span><b>E</b> interact</span><span><b>F</b> car</span>
+      <span><b>SPACE</b> jump / handbrake</span><span><b>E</b> interact</span><span><b>F</b> car</span>
       <span><b>N</b> day/night</span><span><b>M</b> map</span>
     </div>
     <button id="play" disabled>Building the city…</button>
@@ -537,12 +537,29 @@ const texPave = toTex(paint(256,256,(g,w,h)=>{
     g.beginPath(); g.moveTo(0,p); g.lineTo(w,p); g.stroke(); }
 }), 10, 10);
 
-const texRoof = toTex(paint(128,128,(g,w,h)=>{
-  g.fillStyle='#8a4230'; g.fillRect(0,0,w,h);
-  g.strokeStyle='rgba(0,0,0,.32)'; g.lineWidth=2;
-  for(let y=0;y<h;y+=10){ g.beginPath(); g.moveTo(0,y); g.lineTo(w,y); g.stroke(); }
-  speck(g,2500,0,0.15,w,h);
-}), 5, 5);
+/* Finnish roofs are seamed sheet metal (peltikatto): raised standing seams every
+   ~50 cm running down the slope, cross folds every ~2 m, painted in iron-oxide red,
+   dark green or graphite. Landmarks get patinated copper. */
+function seamRoofTex(hex, rep=5){
+  return toTex(paint(128,128,(g,w,h)=>{
+    g.fillStyle = hex; g.fillRect(0,0,w,h);
+    speck(g,2200,255,0.05,w,h); speck(g,2600,0,0.13,w,h);
+    for(let x=0;x<w;x+=16){                       // standing seams
+      g.fillStyle='rgba(255,255,255,.16)'; g.fillRect(x,0,2,h);
+      g.fillStyle='rgba(0,0,0,.34)';       g.fillRect(x+2,0,3,h);
+    }
+    g.strokeStyle='rgba(0,0,0,.2)'; g.lineWidth=1;
+    for(let y=0;y<h;y+=42){ g.beginPath(); g.moveTo(0,y+0.5); g.lineTo(w,y+0.5); g.stroke(); }
+    g.fillStyle='rgba(255,255,255,.05)';          // weathering blotches
+    for(let i=0;i<26;i++) g.fillRect(Math.random()*w, Math.random()*h, 6+Math.random()*22, 3+Math.random()*10);
+  }), rep, rep);
+}
+const ROOF_TEX = [
+  seamRoofTex('#7a3a2c'),  // punamulta — iron-oxide red
+  seamRoofTex('#33463a'),  // dark green
+  seamRoofTex('#474d54'),  // graphite
+  seamRoofTex('#6d5a4a')   // weathered brown
+];
 
 // dashed centre line (transparent between dashes)
 const texDash = new THREE.CanvasTexture(paint(16,128,(g,w,h)=>{
@@ -557,51 +574,194 @@ const zebraCanvas = paint(128,128,(g,w,h)=>{
 const texZebraV = toTex(zebraCanvas);
 const texZebraH = toTex(zebraCanvas); texZebraH.rotation = Math.PI/2; texZebraH.center.set(.5,.5);
 
-/** Facade material: albedo + emissive window mask (lit at night). */
-const facadeCache = new Map();
-function facadeMat(hex){
-  if(facadeCache.has(hex)) return facadeCache.get(hex);
-  const S = 256;
-  const alb = paint(S,S,(g,w,h)=>{
-    g.fillStyle = hex; g.fillRect(0,0,w,h);
-    speck(g,6000,255,0.05,w,h); speck(g,6000,0,0.07,w,h);
-    for(let ry=0;ry<2;ry++) for(let rx=0;rx<2;rx++){
-      const x = rx*w/2 + w*0.11, y = ry*h/2 + h*0.09, ww = w*0.28, hh = h*0.31;
-      g.fillStyle='#efeade'; g.fillRect(x-4,y-4,ww+8,hh+8);
-      g.fillStyle='#243244'; g.fillRect(x,y,ww,hh);
-      g.fillStyle='rgba(255,255,255,.13)';
-      g.beginPath(); g.moveTo(x,y+hh); g.lineTo(x+ww,y); g.lineTo(x+ww,y+hh); g.fill();
-      g.strokeStyle='#efeade'; g.lineWidth=3;
-      g.beginPath(); g.moveTo(x+ww/2,y); g.lineTo(x+ww/2,y+hh); g.stroke();
+/* =========================================================================
+   4b. Facades — Helsinki building stock, on a real storey module
+
+   Researched conventions the generator reproduces:
+   · EMPIRE   Engel's 1820–40 centre (Senate Square): lime-rendered walls in pale
+              ochre / yellow with white painted trim, string course per floor,
+              tall six-light windows, dentil cornice.        (finland.fi, hel.fi)
+   · JUGEND   1900–15 Katajanokka / Eira national romanticism: rough granite
+              rustication at the base, roughcast render above in grey-green and
+              warm grey, arched window heads, small upper panes.  (myhelsinki.fi)
+   · BRICK    Red and yellow Finnish brick with white-painted surrounds.
+   · FUNKIS   1930s functionalism: smooth white render, wide low windows.
+
+   One texture tile = 2 bays × 2 storeys = 6.8 m × 6.8 m, so building heights and
+   widths are snapped to that module and every window lines up with the ground. */
+const STOREY = 3.4, MODULE = STOREY * 2;
+
+const FSTYLE = {
+  empire: {walls:['#e6d3a4','#dcc48c','#ece0c2','#dcbcaa','#ccd2bd','#e3d8c3'],
+           trim:'#f6f3ea', plinth:'#a09c93', panes:[2,3], arch:false, rust:0, bump:0.7},
+  jugend: {walls:['#bcb9ab','#abae9f','#a2acaa','#c5b79e','#94a0a2','#b3a699'],
+           trim:'#efece2', plinth:'#6d6d68', panes:[3,4], arch:true,  rust:1, bump:1.5},
+  brick:  {walls:['#9c4e3a','#aa5e42','#c39c5d','#8f4635'],
+           trim:'#f2efe6', plinth:'#6b6660', panes:[2,3], arch:true,  rust:0, bump:1.2, brick:1},
+  funkis: {walls:['#eeece5','#e4e6e4','#e1dacd'],
+           trim:'#ffffff', plinth:'#8d8d8a', panes:[1,2], arch:false, rust:0, bump:0.4, wide:1}
+};
+const STYLE_NAMES = Object.keys(FSTYLE);
+
+/** Draw one bay-storey cell. `g` albedo ctx, `b` bump ctx (null to skip). */
+function drawBay(g, b, S, ox, oy, u, lit){
+  const wallW = u, wallH = u;
+  // --- wall body -------------------------------------------------------
+  if(S.brick){
+    const ch = u/22;                                    // ~15 cm brick courses
+    for(let y=0; y<wallH; y+=ch){
+      const off = ((y/ch)|0) % 2 ? u/22 : 0;            // running bond
+      for(let x=-u/11; x<wallW; x+=u/11){
+        const l = 0.86 + Math.random()*0.28;
+        g.fillStyle = `rgba(${(150*l)|0},${(78*l)|0},${(58*l)|0},1)`;
+        g.fillRect(ox+x+off+0.6, oy+y+0.6, u/11-1.4, ch-1.4);
+      }
     }
-    g.fillStyle='rgba(0,0,0,.16)'; g.fillRect(0,h-6,w,6);
+    if(b){ b.fillStyle='#6a6a6a'; b.fillRect(ox,oy,wallW,wallH);
+      for(let y=0;y<wallH;y+=u/22){ b.fillStyle='#3a3a3a'; b.fillRect(ox,oy+y,wallW,1.6); } }
+  } else {
+    g.fillStyle = S.wall; g.fillRect(ox, oy, wallW, wallH);
+    if(b){ b.fillStyle='#7a7a7a'; b.fillRect(ox, oy, wallW, wallH); }
+  }
+  // roughcast grain / render mottling
+  for(let i=0;i<u*4;i++){
+    const a = (S.rust ? 0.11 : 0.05) * Math.random();
+    g.fillStyle = Math.random()<0.5 ? `rgba(255,255,255,${a})` : `rgba(0,0,0,${a})`;
+    g.fillRect(ox+Math.random()*u, oy+Math.random()*u, 1+Math.random()*2.5, 1+Math.random()*2.5);
+    if(b && S.rust){ b.fillStyle = `rgba(${Math.random()<0.5?255:0},0,0,${a*2})`;
+      b.fillRect(ox+Math.random()*u, oy+Math.random()*u, 2, 2); }
+  }
+  // --- storey string course (top edge of the cell) ---------------------
+  if(!S.wide){
+    g.fillStyle = S.trim;              g.fillRect(ox, oy, wallW, u*0.022);
+    g.fillStyle = 'rgba(0,0,0,.18)';   g.fillRect(ox, oy + u*0.022, wallW, u*0.012);
+    if(b){ b.fillStyle='#e8e8e8'; b.fillRect(ox, oy, wallW, u*0.022);
+           b.fillStyle='#2a2a2a'; b.fillRect(ox, oy+u*0.022, wallW, u*0.012); }
+  }
+  // --- window ----------------------------------------------------------
+  // 3.4 m storey: sill 0.85 m up, opening 1.20 × 1.75 m (0.75 × 1.15 for funkis wide)
+  const ww = u * (S.wide ? 0.62 : 0.35), wh = u * (S.wide ? 0.33 : 0.515);
+  const wx = ox + (u - ww)/2, wy = oy + u - u*0.25 - wh;
+  const arch = S.arch ? ww*0.5 : 0;
+
+  const opening = (ctx, fill) => {
+    ctx.fillStyle = fill; ctx.beginPath();
+    ctx.moveTo(wx, wy+wh); ctx.lineTo(wx, wy+arch);
+    if(arch) ctx.arc(wx+ww/2, wy+arch, ww/2, Math.PI, 0); else ctx.lineTo(wx, wy);
+    ctx.lineTo(wx+ww, wy+wh); ctx.closePath(); ctx.fill();
+  };
+  const T = Math.max(3, u*0.028);                        // painted surround width
+  g.fillStyle = S.trim;
+  g.fillRect(wx-T, wy-arch-T, ww+2*T, wh+arch+2*T);      // stone / plaster surround
+  if(b){ b.fillStyle='#efefef'; b.fillRect(wx-T, wy-arch-T, ww+2*T, wh+arch+2*T); }
+  opening(g, '#1d2a37');                                 // recessed glass
+  if(b) opening(b, '#101010');                           // deep reveal in the bump
+  // glass: pale sky reflected at the top, the dark room behind it at the bottom
+  const grad = g.createLinearGradient(wx, wy, wx, wy+wh);
+  grad.addColorStop(0,   'rgba(158,188,212,.55)');
+  grad.addColorStop(0.38,'rgba(96,122,148,.22)');
+  grad.addColorStop(1,   'rgba(14,22,32,.55)');
+  g.fillStyle = grad; g.fillRect(wx, wy, ww, wh);
+  g.save();                                              // one soft diagonal sheen
+  g.beginPath(); g.rect(wx, wy, ww, wh); g.clip();
+  g.fillStyle = 'rgba(226,238,248,.13)';
+  g.beginPath(); g.moveTo(wx, wy+wh*0.75); g.lineTo(wx+ww, wy-wh*0.1);
+  g.lineTo(wx+ww, wy+wh*0.25); g.lineTo(wx, wy+wh); g.closePath(); g.fill();
+  g.restore();
+  // white glazing bars — Finnish windows are divided, not single-pane
+  const [pc, pr] = S.panes;
+  g.strokeStyle = S.trim; g.lineWidth = Math.max(1.4, u*0.012);
+  g.beginPath();
+  for(let i=1;i<pc;i++){ g.moveTo(wx+ww*i/pc, wy); g.lineTo(wx+ww*i/pc, wy+wh); }
+  for(let j=1;j<pr;j++){ g.moveTo(wx, wy+wh*j/pr); g.lineTo(wx+ww, wy+wh*j/pr); }
+  g.stroke();
+  if(b){ b.strokeStyle='#cfcfcf'; b.lineWidth = g.lineWidth; b.stroke(); }
+  // sill, projecting past the reveal, with grime washed down below it
+  g.fillStyle = S.trim;              g.fillRect(wx-T*1.6, wy+wh, ww+T*3.2, u*0.028);
+  g.fillStyle = 'rgba(0,0,0,.22)';   g.fillRect(wx-T*1.6, wy+wh+u*0.028, ww+T*3.2, u*0.012);
+  if(b){ b.fillStyle='#ffffff'; b.fillRect(wx-T*1.6, wy+wh, ww+T*3.2, u*0.028); }
+  for(let i=0;i<10;i++){
+    g.fillStyle = `rgba(40,36,30,${0.03+Math.random()*0.05})`;
+    g.fillRect(wx + Math.random()*ww, wy+wh+u*0.04, 1+Math.random()*3, u*0.06+Math.random()*u*0.14);
+  }
+  return lit ? [wx, wy, ww, wh] : null;
+}
+
+/** Facade material: albedo + bump/roughness + emissive window mask (lit at night).
+    The relief depends on the style's geometry, not on the paint colour, so the
+    bump/roughness texture is generated once per style and shared; the emissive
+    mask is only lit rectangles, so it lives happily at a quarter resolution. */
+const facadeCache = new Map(), bumpCache = new Map();
+const P = 512, EMI = 128;                              // albedo / emissive sizes
+function facadeMat(style, hex, variant){
+  const key = style + hex + variant;
+  if(facadeCache.has(key)) return facadeCache.get(key);
+  const u = P/2, S = Object.assign({}, FSTYLE[style], {wall:hex});
+
+  let bump = bumpCache.get(style);
+  const bc = bump ? null : Object.assign(document.createElement('canvas'), {width:P, height:P});
+  const b = bc ? bc.getContext('2d') : null;
+
+  const windows = [];
+  const alb = paint(P, P, g=>{
+    for(let ry=0; ry<2; ry++) for(let rx=0; rx<2; rx++){
+      const w = drawBay(g, b, S, rx*u, ry*u, u, true);
+      if(w) windows.push(w);
+    }
   });
-  const emi = paint(S,S,(g,w,h)=>{
+  if(bc){
+    bump = new THREE.CanvasTexture(bc);
+    bump.wrapS = bump.wrapT = THREE.RepeatWrapping;
+    bump.anisotropy = maxAniso;
+    bumpCache.set(style, bump);
+  }
+  const k = EMI / P;
+  const emi = paint(EMI, EMI, (g,w,h)=>{
     g.fillStyle='#000'; g.fillRect(0,0,w,h);
-    for(let ry=0;ry<2;ry++) for(let rx=0;rx<2;rx++){
-      if(Math.random() < 0.42) continue;
-      g.fillStyle = ['#ffd9a0','#ffe9c4','#cfe4ff'][(Math.random()*3)|0];
-      g.fillRect(rx*w/2 + w*0.11, ry*h/2 + h*0.09, w*0.28, h*0.31);
+    for(const [x,y,ww,wh] of windows){
+      if(Math.random() < 0.45) continue;               // most windows are dark
+      g.fillStyle = ['#ffd39a','#ffe6bd','#c7dcff','#ffcf86'][(Math.random()*4)|0];
+      g.fillRect(x*k, y*k, ww*k, wh*k);
     }
   });
   const m = new THREE.MeshStandardMaterial({
-    map: toTex(alb), emissiveMap: toTex(emi), emissive: new THREE.Color(0xffffff),
-    emissiveIntensity: 0, roughness: 0.86, metalness: 0.02
+    map: toTex(alb), bumpMap: bump, bumpScale: S.bump, roughnessMap: bump,
+    emissiveMap: toTex(emi), emissive: new THREE.Color(0xffffff), emissiveIntensity: 0,
+    roughness: 1.0, metalness: 0.02
   });
   m.userData.lit = 1.15;
-  facadeCache.set(hex, m);
+  facadeCache.set(key, m);
   return m;
 }
 
-/** Per-face UVs so textures never stretch on non-cubic boxes. */
-function boxUV(geo, tile){
+/** Granite / rendered plinth for the ground floor + shopfronts. */
+const texPlinth = toTex(paint(256,256,(g,w,h)=>{
+  g.fillStyle='#7c7972'; g.fillRect(0,0,w,h);
+  for(let y=0;y<h;y+=32){                              // rusticated ashlar courses
+    const off = ((y/32)|0)%2 ? 32 : 0;
+    for(let x=-64;x<w;x+=64){
+      const l = 108 + Math.random()*40;
+      g.fillStyle = `rgb(${l|0},${(l*0.99)|0},${(l*0.94)|0})`;
+      g.fillRect(x+off+2, y+2, 60, 28);
+      g.fillStyle='rgba(0,0,0,.2)';
+      for(let i=0;i<40;i++) g.fillRect(x+off+2+Math.random()*60, y+2+Math.random()*28, 2, 2);
+    }
+  }
+  g.fillStyle='rgba(0,0,0,.3)';
+  for(let y=0;y<h;y+=32) g.fillRect(0,y,w,2);
+}), 4, 1);
+
+/** Per-face UVs on a real-world module: v starts at the building's base so the
+    storeys sit on the ground instead of floating at an arbitrary phase. */
+function boxUV(geo, tileU, tileV = tileU){
   const uv = geo.attributes.uv, p = geo.attributes.position, n = geo.attributes.normal;
+  const hy = geo.parameters.height / 2;
   for(let i=0;i<uv.count;i++){
     const ax = Math.abs(n.getX(i)), ay = Math.abs(n.getY(i));
-    const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-    if(ax > 0.5)      uv.setXY(i, z/tile, y/tile);
-    else if(ay > 0.5) uv.setXY(i, x/tile, z/tile);
-    else              uv.setXY(i, x/tile, y/tile);
+    const x = p.getX(i), y = p.getY(i) + hy, z = p.getZ(i);
+    if(ax > 0.5)      uv.setXY(i, z/tileU, y/tileV);
+    else if(ay > 0.5) uv.setXY(i, x/tileU, z/tileU);
+    else              uv.setXY(i, x/tileU, y/tileV);
   }
   uv.needsUpdate = true;
   return geo;
@@ -622,8 +782,11 @@ const M = {
   tramG:  new THREE.MeshStandardMaterial({color:0x0f6b46, roughness:0.5, metalness:0.3}),
   wood:   new THREE.MeshStandardMaterial({color:0x6b4a2f, roughness:0.9}),
   leaf:   new THREE.MeshStandardMaterial({color:0x3f6b33, roughness:0.95}),
-  roofT:  new THREE.MeshStandardMaterial({map:texRoof, roughness:0.9}),
-  roofD:  new THREE.MeshStandardMaterial({color:0x3a4046, roughness:0.8}),
+  roofT:  new THREE.MeshStandardMaterial({map:ROOF_TEX[0], roughness:0.62, metalness:0.35}),
+  roofD:  new THREE.MeshStandardMaterial({map:ROOF_TEX[2], roughness:0.6,  metalness:0.4}),
+  roofG:  new THREE.MeshStandardMaterial({map:ROOF_TEX[1], roughness:0.6,  metalness:0.4}),
+  roofB:  new THREE.MeshStandardMaterial({map:ROOF_TEX[3], roughness:0.7,  metalness:0.3}),
+  plinth: new THREE.MeshStandardMaterial({map:texPlinth, roughness:0.95}),
   cobble: new THREE.MeshStandardMaterial({map:texCobble, roughness:0.95}),
   asphalt:new THREE.MeshStandardMaterial({map:texAsphalt, roughness:0.97}),
   grass:  new THREE.MeshStandardMaterial({map:texGrass, roughness:1}),
@@ -704,9 +867,9 @@ const sea = new THREE.Mesh(seaGeo, new THREE.ShaderMaterial({
       // fine ripples live in the normal only — the mesh is far too coarse to carry them
       float a = vW.x*0.155 + t*1.25;
       float b = vW.z*0.190 - t*0.95;
-      float c = (vW.x + vW.z)*0.082 + t*0.62;
-      float dx = cos(a)*0.031 + cos(c)*0.021;
-      float dz = cos(b)*0.030 + cos(c)*0.021;
+      float ph = (vW.x + vW.z)*0.082 + t*0.62;
+      float dx = cos(a)*0.031 + cos(ph)*0.021;
+      float dz = cos(b)*0.030 + cos(ph)*0.021;
       vec3 N = normalize(normalize(vN) + vec3(-dx, 0.0, -dz));
       float fres = pow(1.0 - max(dot(N,V),0.0), 3.0);
       vec3 c = mix(deep, shallow, clamp(vH*0.7+0.5, 0.0, 1.0));
@@ -765,36 +928,53 @@ function pad(cx, cz, mat=M.pave){
 /* =========================================================================
    7. Nordic perimeter blocks
    ========================================================================= */
-const PALETTE = ['#d9c6a4','#c9a179','#b96b5c','#cfd6c2','#e5ddcb','#a9b7c5','#d3b25f','#bfa38a'];
+/* The historic centre is Empire; the outer blocks read as Jugend, brick and
+   1930s functionalism, the way the districts actually layer outward. */
+function districtStyle(cx, cz){
+  const d = Math.hypot(cx, cz);
+  if(d < 100) return rr() < 0.75 ? 'empire' : 'jugend';
+  if(d < 190) return rr() < 0.55 ? 'jugend' : (rr() < 0.6 ? 'brick' : 'empire');
+  return rr() < 0.45 ? 'funkis' : (rr() < 0.6 ? 'brick' : 'jugend');
+}
 
-function building(x, z, w, d, h, hex){
-  box(w, h, d, facadeMat(hex), x, h/2 + 0.4, z, 6);
-  box(w+0.5, 3.4, d+0.5, M.dark, x, 2.1, z);            // shopfront
-  box(w+0.9, 0.7, d+0.9, M.cream, x, h + 0.5, z);       // cornice
-  if(rr() < 0.62){
-    const rh = 3.5 + rr()*3.5;
-    const r = new THREE.Mesh(G_PYR, rr()<0.5 ? M.roofD : M.roofT);
-    r.scale.set(w+1.2, rh, d+1.2);
-    r.position.set(x, h + 0.8 + rh/2, z);
+function building(x, z, w, d, h, style){
+  const S = FSTYLE[style];
+  const hex = rpick(S.walls), variant = (rr()*2)|0;
+  const GF = STOREY;                                     // rusticated ground floor
+  box(w, h - GF, d, facadeMat(style, hex, variant), x, GF + (h-GF)/2 + 0.4, z, MODULE);
+  box(w+0.4, GF, d+0.4, M.plinth, x, GF/2 + 0.4, z, 3.4);
+  box(w+0.6, 0.45, d+0.6, M.stone, x, GF + 0.62, z);     // sill band over the plinth
+  box(w+1.0, 0.8, d+1.0, M.cream, x, h + 0.55, z);       // cornice
+  box(w+0.7, 0.35, d+0.7, M.stone, x, h + 1.1, z);       // parapet cap
+  if(rr() < 0.7){                                        // steep seamed roof
+    const rh = 3.2 + rr()*3.4;
+    const r = new THREE.Mesh(G_PYR, rpick([M.roofT, M.roofD, M.roofG, M.roofB]));
+    r.scale.set(w+1.3, rh, d+1.3);
+    r.position.set(x, h + 1.3 + rh/2, z);
     r.castShadow = true; world.add(r);
-    box(1.1, 2.4, 1.1, M.brick, x + rng(-w*0.3,w*0.3), h + rh + 0.6, z + rng(-d*0.3,d*0.3));
+    for(let i=0;i<1+((rr()*2)|0);i++)                    // brick chimneys
+      box(0.9, 2.6, 0.9, M.brick, x + rng(-w*0.32,w*0.32), h + rh + 1.0, z + rng(-d*0.3,d*0.3));
   } else {
-    box(w+1.4, 0.9, d+1.4, M.stone, x, h + 1.3, z);
-    box(2.2, 1.6, 2.2, M.dark, x + rng(-w*0.25,w*0.25), h + 2.4, z);
+    box(2.0, 1.5, 2.0, M.dark, x + rng(-w*0.25,w*0.25), h + 2.0, z);
+    box(0.9, 2.4, 0.9, M.brick, x + rng(-w*0.3,w*0.3), h + 2.5, z + rng(-d*0.3,d*0.3));
   }
   collide(x, z, w/2 + 0.4, d/2 + 0.4);
 }
 
+/** Snap to the storey / bay module so windows line up floor to floor. */
+const snap = (v, m) => Math.max(m, Math.round(v/m)*m);
+
 function perimeterBlock(cx, cz){
   pad(cx, cz);
-  const D = 15, half = BLOCK/2, off = half - 4 - D/2;   // 4 m verge to the curb
+  const D = snap(15, MODULE), half = BLOCK/2, off = half - 4 - D/2;
+  const style = districtStyle(cx, cz);
   for(const s of [{a:'x',f:cz-off},{a:'x',f:cz+off},{a:'z',f:cx-off},{a:'z',f:cx+off}]){
     let cur = -half + 2;
     while(cur < half - 14){
-      const len = Math.min(rng(18,30), half - 2 - cur);
-      const h = rng(14,26), hex = rpick(PALETTE);
-      if(s.a === 'x') building(cx + cur + len/2, s.f, len-1, D, h, hex);
-      else            building(s.f, cz + cur + len/2, D, len-1, h, hex);
+      const len = Math.min(snap(rng(18,30), MODULE), half - 2 - cur);
+      const h = STOREY * (4 + ((rr()*4)|0));             // 4–7 storeys, Helsinki-typical
+      if(s.a === 'x') building(cx + cur + len/2, s.f, len-1, D, h, style);
+      else            building(s.f, cz + cur + len/2, D, len-1, h, style);
       cur += len;
     }
   }
@@ -857,6 +1037,8 @@ function bench(x, z, rot=0){
 const CAR_COLORS = [0xb4392f,0x2e5f9e,0xe0e2e4,0x1d2126,0x3f7d5a,0xc9a227,0x7c4f9c];
 function carMesh(color){
   const g = new THREE.Group();
+  const chassis = new THREE.Group();          // rolls and pitches; wheels do not
+  g.add(chassis);
   const bm = new THREE.MeshStandardMaterial({color, roughness:0.32, metalness:0.55});
   const body = new THREE.Mesh(new THREE.BoxGeometry(2.0,0.72,4.4), bm);
   body.position.y = 0.78;
@@ -868,23 +1050,29 @@ function carMesh(color){
   const skirt = new THREE.Mesh(new THREE.BoxGeometry(2.06,0.3,4.2), M.dark);
   skirt.position.y = 0.45;
   body.castShadow = cabin.castShadow = true;
-  g.add(body, glass, cabin, skirt);
+  chassis.add(body, glass, cabin, skirt);
   const wg = new THREE.CylinderGeometry(0.42,0.42,0.32,14); wg.rotateZ(Math.PI/2);
   const wm = new THREE.MeshStandardMaterial({color:0x15181c, roughness:0.85});
   const wheels = [];
+  // front wheels first: [FL, FR, RL, RR] — the front pair is what steers
   for(const [wx,wz] of [[-0.98,1.42],[0.98,1.42],[-0.98,-1.42],[0.98,-1.42]]){
+    const hub = new THREE.Group();            // steering pivot
+    hub.position.set(wx, 0.44, wz); g.add(hub);
     const w = new THREE.Mesh(wg, wm);
-    w.position.set(wx, 0.44, wz); w.castShadow = true;
-    g.add(w); wheels.push(w);
+    w.castShadow = true; hub.add(w);
+    wheels.push(w); w.userData.hub = hub;
   }
+  const brakeMat = new THREE.MeshStandardMaterial({color:0x8c1f1f, emissive:0xff2200,
+    emissiveIntensity:0.25});
   for(const lx of [-0.62,0.62]){
     const l = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.18,0.1), M.lamp);
-    l.position.set(lx, 0.85, 2.22); g.add(l);
-    const t = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.18,0.1),
-      new THREE.MeshStandardMaterial({color:0x8c1f1f, emissive:0x6d1414, emissiveIntensity:0.5}));
-    t.position.set(lx, 0.9, -2.22); g.add(t);
+    l.position.set(lx, 0.85, 2.22); chassis.add(l);
+    const t = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.18,0.1), brakeMat);
+    t.position.set(lx, 0.9, -2.22); chassis.add(t);
   }
   g.userData.wheels = wheels;
+  g.userData.chassis = chassis;
+  g.userData.brakeMat = brakeMat;
   return g;
 }
 function parkedCar(x, z, rot){
@@ -1044,10 +1232,10 @@ function buildAalto(){
 function buildPadova(){
   const cx = 90, cz = -90;
   pad(cx, cz);
-  const m = facadeMat('#d8b26a');
-  box(56, 18, 16, m, cx, 9.4, cz - 20, 6);
-  box(16, 18, 44, m, cx - 20, 9.4, cz + 2, 6);
-  box(16, 18, 44, m, cx + 20, 9.4, cz + 2, 6);
+  const m = facadeMat('empire', '#d8b26a', 0);
+  box(56, 18, 16, m, cx, 9.4, cz - 20, MODULE);
+  box(16, 18, 44, m, cx - 20, 9.4, cz + 2, MODULE);
+  box(16, 18, 44, m, cx + 20, 9.4, cz + 2, MODULE);
   for(let i=0;i<7;i++){
     const a = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.55, 8, 14, Math.PI), M.cream);
     a.position.set(cx - 18 + i*6, 4.8, cz + 22.2); a.castShadow = true; world.add(a);
@@ -1064,7 +1252,7 @@ function buildPadova(){
   collide(cx - 20, cz + 2, 9, 23);
   collide(cx + 20, cz + 2, 9, 23);
   // lab annex
-  box(14, 11, 12, facadeMat('#cfd6c2'), 114, 6, -64, 6);
+  box(14, 11, 12, facadeMat('funkis', '#e4e6e4', 1), 114, 6, -64, MODULE);
   box(15.4, 1, 13.4, M.roofD, 114, 12, -64);
   box(3.4, 3.2, 0.3, M.glassW, 114, 2.5, -57.8);
   collide(114, -64, 7.4, 6.4);
@@ -1262,37 +1450,200 @@ for(const p of POIS){
 /* =========================================================================
    12. Player & car
    ========================================================================= */
+/* A 1.79 m figure on a real skeleton: hips → spine → chest → neck → head, and
+   two-segment limbs with actual knee and elbow joints, so the walk cycle can be
+   driven by joint angles rather than by swinging rigid blocks. */
+const PMAT = {
+  skin: new THREE.MeshStandardMaterial({color:0xc98d68, roughness:0.58}),
+  coat: new THREE.MeshStandardMaterial({color:0x223a52, roughness:0.88}),
+  coatD:new THREE.MeshStandardMaterial({color:0x1b2f42, roughness:0.9}),
+  jean: new THREE.MeshStandardMaterial({color:0x2f3742, roughness:0.92}),
+  hair: new THREE.MeshStandardMaterial({color:0x18150f, roughness:0.85}),
+  shoe: new THREE.MeshStandardMaterial({color:0x15171b, roughness:0.7}),
+  eye:  new THREE.MeshStandardMaterial({color:0x14100c, roughness:0.25})
+};
+
 function makePerson(){
-  const g = new THREE.Group();
-  const skin = new THREE.MeshStandardMaterial({color:0xd8a077, roughness:0.85});
-  const coat = new THREE.MeshStandardMaterial({color:0x25405e, roughness:0.8});
-  const jean = new THREE.MeshStandardMaterial({color:0x2c3138, roughness:0.9});
-  const hair = new THREE.MeshStandardMaterial({color:0x171512, roughness:0.95});
-  const shoe = new THREE.MeshStandardMaterial({color:0x14161a, roughness:0.9});
-  const add = (geo,mat,x,y,z,parent)=>{
-    const m = new THREE.Mesh(geo,mat); m.position.set(x,y,z);
-    m.castShadow = true; (parent||g).add(m); return m;
+  const root = new THREE.Group();
+  const J = {};
+  const joint = (parent, x, y, z) => {
+    const j = new THREE.Group(); j.position.set(x, y, z); parent.add(j); return j;
   };
-  add(new THREE.BoxGeometry(0.58,0.72,0.34), coat, 0, 1.28, 0);
-  add(new THREE.BoxGeometry(0.62,0.2,0.38), coat, 0, 0.94, 0);
-  add(new THREE.CylinderGeometry(0.09,0.09,0.12,8), skin, 0, 1.71, 0);
-  add(new THREE.BoxGeometry(0.28,0.32,0.28), skin, 0, 1.93, 0);
-  add(new THREE.BoxGeometry(0.31,0.14,0.31), hair, 0, 2.07, 0);
-  add(new THREE.BoxGeometry(0.31,0.2,0.16), hair, 0, 1.99, -0.09);
-  const L = {};
-  for(const side of [-1,1]){
-    const arm = new THREE.Group(); arm.position.set(side*0.36, 1.56, 0); g.add(arm);
-    add(new THREE.BoxGeometry(0.16,0.5,0.16), coat, 0, -0.25, 0, arm);
-    add(new THREE.BoxGeometry(0.15,0.22,0.15), skin, 0, -0.6, 0, arm);
-    const leg = new THREE.Group(); leg.position.set(side*0.16, 0.86, 0); g.add(leg);
-    add(new THREE.BoxGeometry(0.2,0.5,0.2), jean, 0, -0.26, 0, leg);
-    add(new THREE.BoxGeometry(0.19,0.34,0.19), jean, 0, -0.66, 0, leg);
-    add(new THREE.BoxGeometry(0.22,0.13,0.32), shoe, 0, -0.88, 0.05, leg);
-    L[side>0?'armR':'armL'] = arm;
-    L[side>0?'legR':'legL'] = leg;
+  /** Capsule limb hanging down from its joint: r0 top radius, r1 bottom, len. */
+  const limb = (parent, r0, r1, len, mat) => {
+    const r = (r0 + r1) / 2;
+    const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, Math.max(0.01, len - 2*r), 4, 10), mat);
+    m.position.y = -len/2;
+    m.castShadow = true; parent.add(m); return m;
+  };
+  const slab = (parent, w, h, d, mat, x, y, z) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d, 1, 1, 1), mat);
+    m.position.set(x, y, z); m.castShadow = true; parent.add(m); return m;
+  };
+
+  // --- torso ------------------------------------------------------------
+  const hips = joint(root, 0, STAND_PIVOT + HIPY, 0);  J.hips = hips;
+  const pelvis = new THREE.Mesh(new THREE.CapsuleGeometry(0.145, 0.1, 4, 12), PMAT.jean);
+  pelvis.scale.set(1.25, 1, 0.78); pelvis.castShadow = true; hips.add(pelvis);
+
+  const spine = joint(hips, 0, 0.06, 0); J.spine = spine;
+  const chest = new THREE.Mesh(new THREE.CapsuleGeometry(0.175, 0.3, 4, 14), PMAT.coat);
+  chest.scale.set(1.28, 1, 0.72); chest.position.y = 0.22;
+  chest.castShadow = true; spine.add(chest);
+  slab(spine, 0.44, 0.30, 0.29, PMAT.coatD, 0, 0.20, 0.005);   // coat front / lapels
+  // shoulders
+  const yoke = new THREE.Mesh(new THREE.CapsuleGeometry(0.105, 0.36, 4, 10), PMAT.coat);
+  yoke.rotation.z = Math.PI/2; yoke.position.y = 0.42;
+  yoke.scale.set(1, 1, 0.8); yoke.castShadow = true; spine.add(yoke);
+
+  const neck = joint(spine, 0, 0.46, 0);
+  const neckM = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.068, 0.1, 10), PMAT.skin);
+  neckM.position.y = 0.05; neck.add(neckM);
+  const head = joint(neck, 0, 0.12, 0); J.head = head;
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.105, 18, 14), PMAT.skin);
+  skull.scale.set(0.92, 1.16, 1.0); skull.position.y = 0.045;
+  skull.castShadow = true; head.add(skull);
+  slab(head, 0.115, 0.075, 0.055, PMAT.skin, 0, 0.005, 0.085);   // jaw / chin
+  const hairM = new THREE.Mesh(new THREE.SphereGeometry(0.111, 16, 12,
+                  0, Math.PI*2, 0, Math.PI*0.62), PMAT.hair);
+  hairM.scale.set(0.95, 1.2, 1.03); hairM.position.set(0, 0.045, -0.008);
+  head.add(hairM);
+  for(const s of [-1, 1]){
+    const e = new THREE.Mesh(new THREE.SphereGeometry(0.015, 8, 6), PMAT.eye);
+    e.position.set(s*0.038, 0.052, 0.088); head.add(e);
   }
-  g.userData = L;
-  return g;
+
+  // --- arms -------------------------------------------------------------
+  for(const s of [-1, 1]){
+    const sh = joint(spine, s*0.205, 0.40, 0);
+    limb(sh, 0.058, 0.05, 0.30, PMAT.coat);
+    const elbow = joint(sh, 0, -0.30, 0);
+    limb(elbow, 0.05, 0.042, 0.26, PMAT.coat);
+    const hand = new THREE.Mesh(new THREE.CapsuleGeometry(0.043, 0.06, 3, 8), PMAT.skin);
+    hand.scale.set(1, 1, 0.6); hand.position.y = -0.30; hand.castShadow = true;
+    elbow.add(hand);
+    J[s > 0 ? 'shR' : 'shL'] = sh;
+    J[s > 0 ? 'elR' : 'elL'] = elbow;
+  }
+
+  // --- legs -------------------------------------------------------------
+  for(const s of [-1, 1]){
+    const hip = joint(hips, s*0.095, -HIPY, 0);
+    limb(hip, 0.085, 0.068, THIGH, PMAT.jean);
+    const knee = joint(hip, 0, -THIGH, 0);
+    limb(knee, 0.068, 0.05, SHIN, PMAT.jean);
+    const ankle = joint(knee, 0, -SHIN, 0);
+    const foot = new THREE.Mesh(new THREE.BoxGeometry(0.095, ANKLE_H, 0.25), PMAT.shoe);
+    foot.position.set(0, -ANKLE_H/2, 0.055); foot.castShadow = true; ankle.add(foot);
+    const toe = new THREE.Mesh(new THREE.CapsuleGeometry(0.045, 0.05, 3, 8), PMAT.shoe);
+    toe.rotation.x = Math.PI/2; toe.scale.set(1.05, 1, 0.72);
+    toe.position.set(0, -0.033, 0.165); ankle.add(toe);
+    J[s > 0 ? 'hipR' : 'hipL'] = hip;
+    J[s > 0 ? 'kneeR' : 'kneeL'] = knee;
+    J[s > 0 ? 'ankR' : 'ankL'] = ankle;
+  }
+
+  root.userData = J;
+  return root;
+}
+
+/* Gait geometry. The stride is not a free parameter: over the stance phase the
+   planted foot has to travel backwards under the hips at exactly walking speed,
+   or the feet visibly skate. With leg length LEG, hip swing ±A and the foot on
+   the ground for DUTY of the cycle, that pins the stride at 2·LEG·sin A / DUTY.
+   Running lengthens the swing and shortens the stance, as it does in life. */
+const THIGH = 0.47, SHIN = 0.45, ANKLE_H = 0.07;      // segment lengths (m)
+const HIPY = 0.04;                                    // hip pivot below the pelvis origin
+const STAND_PIVOT = ANKLE_H + (THIGH + SHIN) * 0.978; // hip height, legs near-straight
+const gaitDuty  = run => 0.62 - run * 0.36;           // fraction of the cycle in stance
+const halfStep  = run => 0.40 + run * 0.05;           // half the foot's stance travel
+const strideLen = run => 2 * halfStep(run) / gaitDuty(run);
+
+/** Two-link IK: where must the hip and knee point for the ankle to sit at
+    (dz forward, dy up) relative to the hip pivot? Returns anatomical angles —
+    `th` thigh forward, `kf` knee flexed — which the caller negates as needed. */
+function legIK(dz, dy){
+  const reach = THIGH + SHIN;
+  let d = Math.hypot(dz, dy);
+  if(d > reach * 0.999){ const k = reach * 0.999 / d; dz *= k; dy *= k; d = reach * 0.999; }
+  const cosK = (THIGH*THIGH + SHIN*SHIN - d*d) / (2 * THIGH * SHIN);
+  const kf = Math.PI - Math.acos(Math.max(-1, Math.min(1, cosK)));   // 0 = straight
+  const cosO = (THIGH*THIGH + d*d - SHIN*SHIN) / (2 * THIGH * d);
+  const off = Math.acos(Math.max(-1, Math.min(1, cosO)));
+  return {th: Math.atan2(dz, -dy) + off, kf};
+}
+
+/** Walk / run / idle / airborne pose for one frame.
+    `phase` is the gait cycle in radians, `gait` 0..1 blends idle → full stride,
+    `run` 0..1 leans the figure and lengthens the stride. */
+function poseWalk(J, phase, gait, run, t, airborne, lean){
+  const DUTY = gaitDuty(run), half = halfStep(run) * gait;
+  const sw = Math.sin(phase), cw = Math.cos(phase);
+  // The pelvis drops into a slight crouch to walk, and bounces twice per cycle.
+  const pivot = STAND_PIVOT - gait * (0.09 + run * 0.02)
+              + gait * 0.025 * (1 - Math.cos(phase * 2)) * 0.5;
+  J.hips.position.y = pivot + HIPY;
+
+  // The figure faces local +z, so on every joint a POSITIVE rotation.x swings
+  // the segment backwards; the IK returns anatomical angles, negated below.
+  for(const s of [1, -1]){
+    const p = (s > 0 ? phase : phase + Math.PI) / (Math.PI*2);
+    const u = p - Math.floor(p);                        // 0..1 through the cycle
+    const hip  = s > 0 ? J.hipR  : J.hipL;
+    const knee = s > 0 ? J.kneeR : J.kneeL;
+    const ank  = s > 0 ? J.ankR  : J.ankL;
+
+    // Where the ankle has to be. In stance it slides straight back at exactly
+    // the speed the body moves forward, which is what stops the feet skating.
+    let fz, fy, swing = 0, late = 0;
+    if(u < DUTY){
+      const q = u / DUTY;
+      fz = half * (1 - 2*q);
+      fy = ANKLE_H;
+      late = Math.max(0, (q - 0.66) / 0.34);            // heel lifts for toe-off
+    } else {
+      const q = (u - DUTY) / (1 - DUTY), e = q*q*(3 - 2*q);
+      fz = half * (2*e - 1);
+      swing = Math.sin(Math.PI * q);
+      fy = ANKLE_H + (0.13 + run * 0.07) * swing * gait;
+    }
+    const {th, kf} = legIK(fz, fy - pivot);
+    hip.rotation.x  = -th;
+    knee.rotation.x = kf;
+    // hold the sole level against the leg above it, then plantarflex off the toe
+    ank.rotation.x  = (th - kf) * 0.85 + (0.45 * late - 0.22 * swing) * gait;
+    // shoulders counter-swing the legs; elbows carry a permanent bend
+    const sh = s > 0 ? J.shR : J.shL, el = s > 0 ? J.elR : J.elL;
+    sh.rotation.x = th * (0.55 + run*0.30) * gait;
+    sh.rotation.z = s * (0.10 + run*0.06 + 0.02*Math.sin(t*1.4));
+    el.rotation.x = -(0.22 + run*0.5) - Math.max(0, th) * (0.5 + run*0.6);
+  }
+  J.hips.rotation.z  = -0.055 * gait * sw;
+  J.hips.rotation.y  = -0.12 * gait * sw;
+  J.spine.rotation.y = 0.16 * gait * sw;
+  J.spine.rotation.x = lean + (0.06 + run*0.22) * gait + 0.02 * cw;
+  J.spine.rotation.z = 0.03 * gait * sw;
+  J.head.rotation.x  = -J.spine.rotation.x * 0.7;      // eyes stay on the horizon
+  J.head.rotation.y  = -0.10 * gait * sw + 0.05 * Math.sin(t * 0.6);
+
+  if(gait < 0.05){                                     // idle: breathe and shift
+    const br = Math.sin(t * 1.6) * 0.012;
+    J.spine.rotation.x += br;
+    J.spine.position.y = br * 0.5;
+    J.shR.rotation.x = J.shL.rotation.x = 0.04 + br;
+  } else J.spine.position.y = 0;
+
+  if(airborne > 0){                                    // tuck in the air
+    const k = airborne;
+    J.hipR.rotation.x  += (-0.85 - J.hipR.rotation.x) * k;   // lead knee up
+    J.hipL.rotation.x  += (0.35 - J.hipL.rotation.x) * k;    // trailing leg back
+    J.kneeR.rotation.x += (1.15 - J.kneeR.rotation.x) * k;
+    J.kneeL.rotation.x += (0.55 - J.kneeL.rotation.x) * k;
+    J.shR.rotation.x   += (-2.1 - J.shR.rotation.x) * k;
+    J.shL.rotation.x   += (-2.1 - J.shL.rotation.x) * k;
+    J.elR.rotation.x   += (-0.6 - J.elR.rotation.x) * k;
+    J.elL.rotation.x   += (-0.6 - J.elL.rotation.x) * k;
+  }
 }
 
 const player = makePerson();
@@ -1305,12 +1656,35 @@ playerCar.position.set(-18, 0.42, 24);
 playerCar.rotation.y = Math.PI;
 world.add(playerCar);
 
+/* --- vehicle parameters: a ~1.4 t front-engine hatchback ------------------
+   Everything below is in SI units, so the numbers are the ones you would look
+   up for a real car and the handling falls out of the model rather than being
+   hand-tuned per key press. */
+const CAR = {
+  m: 1380, Iz: 2050,            // mass (kg), yaw inertia (kg·m²)
+  a: 1.16, b: 1.44,             // CG → front axle, CG → rear axle (m)
+  hcg: 0.53,                    // CG height (m) — sets the load transfer
+  Cf: 88000, Cr: 104000,        // axle cornering stiffness (N/rad)
+  mu: 1.05,                     // tyre–asphalt friction
+  Fdrive: 8200, Fbrake: 13500,  // peak drive / brake force (N)
+  vmax: 46,                     // m/s where drive force reaches zero (~165 km/h)
+  Cd: 0.31, A: 2.2, rho: 1.225, // aerodynamic drag
+  Crr: 0.016,                   // rolling resistance coefficient
+  steerMax: 0.56, steerRate: 3.4,
+  wheelR: 0.42
+};
+const G = 9.81;
+
 const S = {
   pos: new THREE.Vector3(16, 0, 26),
-  yaw: Math.PI, vy: 0, onGround: true, bob: 0,
+  vel: new THREE.Vector3(),                         // on-foot horizontal velocity
+  yaw: Math.PI, vy: 0, onGround: true, gaitPhase: 0, gait: 0, run: 0, airT: 0,
   camYaw: 0, camPitch: 0.28, camDist: 8.6,          // looking north, at the cathedral
-  inCar: false, carYaw: Math.PI, carSpeed: 0,
-  carPos: new THREE.Vector3(-18, 0, 24)
+  inCar: false,
+  carPos: new THREE.Vector3(-18, 0, 24),
+  carYaw: Math.PI,
+  u: 0, v: 0, r: 0,                                 // body-frame long / lat vel, yaw rate
+  steer: 0, roll: 0, pitch: 0, spin: 0, braking: 0, slip: 0
 };
 
 /* =========================================================================
@@ -1389,6 +1763,8 @@ function toggleCar(){
     S.inCar = false;
     S.pos.set(S.carPos.x - Math.cos(S.carYaw)*3.2, 0, S.carPos.z + Math.sin(S.carYaw)*3.2);
     resolve(S.pos, 0.45);
+    S.vel.set(0,0,0);
+    S.u = S.v = S.r = 0;                      // you cannot bail out of a moving car
     player.visible = true;
     S.camDist = 8.2;
     el('speedo').style.display = 'none';
@@ -1591,9 +1967,176 @@ function applyLighting(dt){
    17. Loop
    ========================================================================= */
 const clock = new THREE.Clock();
-const fwd = new THREE.Vector3(), right = new THREE.Vector3(), dir = new THREE.Vector3();
+const fwd = new THREE.Vector3(), right = new THREE.Vector3();
 const camTarget = new THREE.Vector3(), camWant = new THREE.Vector3(), toCam = new THREE.Vector3();
 const ray = new THREE.Raycaster();
+
+/* -------------------------------------------------------------------------
+   On foot: force-based locomotion. Input sets a target velocity, the legs
+   accelerate towards it at a finite rate, and ground friction brings you back
+   to a stop — so there is momentum, a slide when you release, and much less
+   authority in the air than on the ground.
+   ------------------------------------------------------------------------- */
+const wish = new THREE.Vector3(), acc = new THREE.Vector3();
+function stepPlayer(dt, ix, iz, mag, t){
+  const sprinting = (keys.ShiftLeft || keys.ShiftRight) && mag > 0.1;
+  const vTarget = sprinting ? 5.8 : 1.9;             // m/s: brisk walk vs. run
+  fwd.set(-Math.sin(S.camYaw), 0, -Math.cos(S.camYaw));
+  right.set(Math.cos(S.camYaw), 0, -Math.sin(S.camYaw));
+  wish.set(0,0,0).addScaledVector(fwd, -iz).addScaledVector(right, ix);
+  const wanted = wish.lengthSq() > 1e-4;
+  if(wanted) wish.normalize().multiplyScalar(vTarget * mag);
+
+  const onG = S.onGround;
+  const accel = onG ? (sprinting ? 26 : 20) : 6;     // legs push hard, air does not
+  acc.copy(wish).sub(S.vel);
+  acc.y = 0;
+  const need = acc.length();
+  if(need > 1e-4) S.vel.addScaledVector(acc.divideScalar(need), Math.min(need, accel*dt));
+  if(!wanted && onG){                                 // friction — decelerate, not damp
+    const sp = S.vel.length();
+    if(sp > 1e-4) S.vel.multiplyScalar(Math.max(0, sp - 22*dt) / sp);
+  }
+
+  if(keys.Space && onG){ S.vy = 5.6; S.onGround = false; S.airT = 0; }
+  S.vy -= 22 * dt;                                    // a touch heavier than 1 g reads better
+  let y = player.position.y + S.vy * dt;
+  if(y <= 0){ y = 0; if(!S.onGround) S.airT = 0; S.vy = 0; S.onGround = true; }
+  else S.airT += dt;
+  player.position.y = y;
+
+  // integrate + resolve, cancelling the velocity component pushed out of a wall
+  const bx = S.pos.x, bz = S.pos.z;
+  S.pos.x += S.vel.x * dt;
+  S.pos.z += S.vel.z * dt;
+  const wx = S.pos.x, wz = S.pos.z;
+  resolve(S.pos, 0.36);
+  const nx = S.pos.x - wx, nz = S.pos.z - wz;
+  if(nx || nz){
+    const L = Math.hypot(nx, nz), ux = nx/L, uz = nz/L;
+    const into = S.vel.x*ux + S.vel.z*uz;
+    if(into < 0){ S.vel.x -= into*ux; S.vel.z -= into*uz; }   // slide along the wall
+  }
+  player.position.x = S.pos.x;
+  player.position.z = S.pos.z;
+
+  // face the direction of travel, not of input — turning has a radius
+  const speed = Math.hypot(S.vel.x, S.vel.z);
+  if(speed > 0.4) S.yaw = Math.atan2(S.vel.x, S.vel.z);
+  let dyaw = S.yaw - player.rotation.y;
+  while(dyaw >  Math.PI) dyaw -= Math.PI*2;
+  while(dyaw < -Math.PI) dyaw += Math.PI*2;
+  player.rotation.y += dyaw * Math.min(1, dt*12);
+
+  // Stride length comes from the leg geometry, so the cycle rate is whatever
+  // keeps the planted foot still at the current speed — no skating at any pace.
+  S.gait = S.gait + (Math.min(1, speed/1.5) - S.gait) * Math.min(1, dt*9);
+  S.run  = S.run  + (Math.min(1, Math.max(0, speed-2.4)/3.0) - S.run) * Math.min(1, dt*6);
+  S.gaitPhase += dt * Math.PI * 2 * (speed > 0.15 ? speed / strideLen(S.run) : 0);
+  const lean = Math.min(0.22, speed * 0.030);
+  poseWalk(player.userData, S.gaitPhase, S.gait, S.run, t,
+           S.onGround ? 0 : Math.min(1, S.airT*6), lean);
+}
+
+/* -------------------------------------------------------------------------
+   The car: a single-track ("bicycle") model — the standard vehicle-dynamics
+   approximation. Each axle gets a slip angle, a saturating lateral tyre force
+   limited by the friction circle, and a vertical load that shifts fore/aft
+   under acceleration. Understeer, snap oversteer, weight transfer and
+   handbrake drifts all emerge from that; none of them are special-cased.
+   ------------------------------------------------------------------------- */
+function tyre(alpha, C, Fz){
+  const peak = CAR.mu * Fz;                 // friction circle limit for this axle
+  return peak > 1 ? -peak * Math.tanh(C * alpha / peak) : 0;
+}
+function stepCar(dt, ix, iz){
+  const {m, Iz, a, b, hcg, wheelR} = CAR, Lwb = a + b;
+
+  // --- steering: rate-limited, and tightened up as speed rises ------------
+  const auth = 0.34 + 0.66 / (1 + Math.abs(S.u) * 0.055);
+  const want = ix * CAR.steerMax * auth;
+  S.steer += Math.max(-CAR.steerRate*dt, Math.min(CAR.steerRate*dt, want - S.steer));
+  const d = S.steer, handbrake = !!keys.Space;
+
+  // --- longitudinal force ------------------------------------------------
+  const thr = Math.max(0, -iz), rev = Math.max(0, iz);
+  let Fx = 0;
+  S.braking = 0;
+  if(thr > 0) Fx += thr * CAR.Fdrive * Math.max(0, 1 - Math.max(0, S.u) / CAR.vmax);
+  if(rev > 0){
+    if(S.u > 0.6){ Fx -= rev * CAR.Fbrake; S.braking = 1; }   // brake before reversing
+    else          Fx -= rev * CAR.Fdrive * 0.45 * Math.max(0, 1 + S.u / 14);
+  }
+  if(handbrake && Math.abs(S.u) > 0.4){ Fx -= Math.sign(S.u) * CAR.Fbrake * 0.45; S.braking = 1; }
+  Fx -= 0.5 * CAR.rho * CAR.Cd * CAR.A * S.u * Math.abs(S.u);   // aero drag
+  Fx -= CAR.Crr * m * G * Math.sign(S.u) * Math.min(1, Math.abs(S.u)*4);  // rolling resistance
+
+  // --- vertical loads with longitudinal weight transfer -------------------
+  const axPrev = Fx / m;
+  const W = m * G;
+  const Fzf = Math.max(400, W * b / Lwb - m * axPrev * hcg / Lwb);
+  const Fzr = Math.max(400, W * a / Lwb + m * axPrev * hcg / Lwb);
+
+  // --- slip angles and lateral tyre forces --------------------------------
+  const uSafe = Math.max(Math.abs(S.u), 1.4);           // avoid the 0-speed singularity
+  const af = Math.atan2(S.v + a * S.r, uSafe) - d * Math.sign(S.u || 1);
+  const ar = Math.atan2(S.v - b * S.r, uSafe);
+  const Fyf = tyre(af, CAR.Cf, Fzf);
+  const Fyr = tyre(ar, CAR.Cr, Fzr) * (handbrake ? 0.35 : 1);   // locked rears let go
+  S.slip = Math.min(1, Math.abs(ar) / 0.22);
+
+  // --- rigid-body equations in the body frame -----------------------------
+  const cd = Math.cos(d), sd = Math.sin(d);
+  const du = (Fx - Fyf * sd) / m + S.v * S.r;
+  const dv = (Fyf * cd + Fyr) / m - S.u * S.r;
+  const dr = (a * Fyf * cd - b * Fyr) / Iz;
+  S.u += du * dt;
+  S.v += dv * dt;
+  S.r += dr * dt;
+  if(Math.abs(S.u) < 0.12 && thr === 0 && rev === 0){ S.u = 0; S.v *= 0.5; S.r *= 0.5; }
+  S.carYaw += S.r * dt;
+
+  // --- integrate in world space -------------------------------------------
+  const sy = Math.sin(S.carYaw), cy = Math.cos(S.carYaw);
+  let Vx = S.u * sy + S.v * cy;                 // forward = (sin ψ, cos ψ), right = (cos ψ, −sin ψ)
+  let Vz = S.u * cy - S.v * sy;
+  S.carPos.x += Vx * dt;
+  S.carPos.z += Vz * dt;
+
+  // --- collision: bounce off, scrub speed, and kick the yaw ---------------
+  const wx = S.carPos.x, wz = S.carPos.z;
+  resolve(S.carPos, 1.9);
+  const nx = S.carPos.x - wx, nz = S.carPos.z - wz;
+  if(nx || nz){
+    const L = Math.hypot(nx, nz), ux = nx/L, uz = nz/L;
+    const vn = Vx*ux + Vz*uz;
+    if(vn < 0){ Vx -= 1.25 * vn * ux; Vz -= 1.25 * vn * uz; }   // e ≈ 0.25
+    Vx *= 0.7; Vz *= 0.7;
+    S.u = Vx * sy + Vz * cy;
+    S.v = Vx * cy - Vz * sy;
+    S.r *= 0.35;
+  }
+
+  // --- visuals: body roll and pitch from the actual accelerations ---------
+  const ay = (Fyf + Fyr) / m, ax = du;
+  S.roll  += (Math.max(-0.16, Math.min(0.16, -ay * 0.016)) - S.roll)  * Math.min(1, dt*7);
+  S.pitch += (Math.max(-0.10, Math.min(0.10, -ax * 0.009)) - S.pitch) * Math.min(1, dt*7);
+  const car = playerCar;
+  car.position.set(S.carPos.x, 0.42 - Math.abs(S.roll)*0.12, S.carPos.z);
+  car.rotation.y = S.carYaw;
+  car.userData.chassis.rotation.z = S.roll;
+  car.userData.chassis.rotation.x = S.pitch;
+  car.userData.brakeMat.emissiveIntensity = S.braking ? 2.2 : 0.25;
+
+  S.spin -= (S.u / wheelR) * dt * (handbrake ? 0.15 : 1);   // locked wheels stop turning
+  const wr = car.userData.wheels;
+  for(const w of wr) w.rotation.x = S.spin;
+  wr[0].userData.hub.rotation.y = d * 1.06;   // Ackermann: inner wheel turns more
+  wr[1].userData.hub.rotation.y = d * 0.94;
+
+  S.pos.set(S.carPos.x, 0, S.carPos.z);
+  el('kmh').textContent = Math.round(Math.hypot(S.u, S.v) * 3.6);
+}
 
 function step(dt, t){
   let ix = 0, iz = 0;
@@ -1605,69 +2148,26 @@ function step(dt, t){
   const mag = Math.min(1, Math.hypot(ix, iz));
 
   if(S.inCar){
-    S.carSpeed += (-iz) * 26 * dt;
-    S.carSpeed *= 1 - dt * (Math.abs(iz) < 0.05 ? 1.5 : 0.5);
-    S.carSpeed = Math.max(-13, Math.min(34, S.carSpeed));
-    const grip = Math.min(1, Math.abs(S.carSpeed) / 7);
-    S.carYaw -= ix * 1.7 * dt * grip * (S.carSpeed < 0 ? -1 : 1);
-    const px = S.carPos.x, pz = S.carPos.z;
-    S.carPos.x += Math.sin(S.carYaw) * S.carSpeed * dt;
-    S.carPos.z += Math.cos(S.carYaw) * S.carSpeed * dt;
-    const wx = S.carPos.x, wz = S.carPos.z;
-    resolve(S.carPos, 1.9);
-    if(Math.abs(S.carPos.x - wx) + Math.abs(S.carPos.z - wz) > 0.06) S.carSpeed *= 0.3;
-    playerCar.position.set(S.carPos.x, 0.42, S.carPos.z);
-    playerCar.rotation.y = S.carYaw;
-    const wr = playerCar.userData.wheels;
-    for(const w of wr) w.rotation.x -= S.carSpeed * dt * 2.4;
-    wr[0].rotation.y = wr[1].rotation.y = -ix * 0.4;
-    S.pos.set(S.carPos.x, 0, S.carPos.z);
-    el('kmh').textContent = Math.round(Math.abs(S.carSpeed) * 3.6);
-    void px; void pz;
+    stepCar(dt, ix, iz);
   } else {
-    const sprint = (keys.ShiftLeft || keys.ShiftRight) ? 1.95 : 1;
-    const speed = 5.2 * sprint;
-    fwd.set(-Math.sin(S.camYaw), 0, -Math.cos(S.camYaw));
-    right.set(Math.cos(S.camYaw), 0, -Math.sin(S.camYaw));
-    dir.set(0,0,0).addScaledVector(fwd, -iz).addScaledVector(right, ix);
-    const moving = dir.lengthSq() > 0.0004;
-    if(moving){
-      dir.normalize();
-      S.yaw = Math.atan2(dir.x, dir.z);
-      S.pos.addScaledVector(dir, speed * dt * mag);
-      S.bob += dt * speed * (sprint > 1 ? 2.3 : 1.9);
-    }
-    if(keys.Space && S.onGround){ S.vy = 6.6; S.onGround = false; }
-    S.vy -= 19 * dt;
-    let y = player.position.y + S.vy * dt;
-    if(y <= 0){ y = 0; S.vy = 0; S.onGround = true; }
-    player.position.y = y;
-    resolve(S.pos, 0.45);
-    player.position.x = S.pos.x;
-    player.position.z = S.pos.z;
-    let dyaw = S.yaw - player.rotation.y;
-    while(dyaw >  Math.PI) dyaw -= Math.PI*2;
-    while(dyaw < -Math.PI) dyaw += Math.PI*2;
-    player.rotation.y += dyaw * Math.min(1, dt*14);
-    const L = player.userData;
-    const amp = moving ? (sprint > 1 ? 1.0 : 0.7) : 0;
-    const sw = Math.sin(S.bob * 3.4) * amp;
-    L.legL.rotation.x = sw;        L.legR.rotation.x = -sw;
-    L.armL.rotation.x = -sw*0.85;  L.armR.rotation.x = sw*0.85;
-    L.armL.rotation.z = 0.09;      L.armR.rotation.z = -0.09;
-    if(!S.onGround){
-      L.legL.rotation.x = -0.5; L.legR.rotation.x = 0.3;
-      L.armL.rotation.x = L.armR.rotation.x = -1.7;
-    }
+    stepPlayer(dt, ix, iz, mag, t);
   }
 
   /* camera */
+  const carSpeed = S.inCar ? Math.hypot(S.u, S.v) : 0;
   camTarget.set(S.pos.x, (S.inCar ? 1.7 : 1.5 + player.position.y), S.pos.z);
-  if(S.inCar && Math.abs(S.carSpeed) > 2){
-    let d = (S.carYaw + Math.PI) - S.camYaw;
+  if(S.inCar && carSpeed > 2){
+    // trail the car's velocity, not its nose — that is what makes a drift read
+    const drift = Math.atan2(S.v, Math.abs(S.u) + 0.01) * 0.55;
+    let d = (S.carYaw + Math.PI + (S.u < 0 ? 0 : drift)) - S.camYaw;
     while(d >  Math.PI) d -= Math.PI*2;
     while(d < -Math.PI) d += Math.PI*2;
-    S.camYaw += d * Math.min(1, dt * 1.7);
+    S.camYaw += d * Math.min(1, dt * 1.9);
+  }
+  const fov = 58 + Math.min(13, carSpeed * 0.42);      // speed sells itself
+  if(Math.abs(camera.fov - fov) > 0.05){
+    camera.fov += (fov - camera.fov) * Math.min(1, dt*4);
+    camera.updateProjectionMatrix();
   }
   const cp = Math.cos(S.camPitch);
   camWant.set(
@@ -1759,7 +2259,99 @@ addEventListener('resize', ()=>{
 });
 
 /* =========================================================================
-   18. Boot
+   18. Self-check — open index.html?selftest and read the console.
+   Exercises the real stepCar / poseWalk, so a regression in the vehicle model
+   or the walk cycle shows up without having to drive around looking for it.
+   ========================================================================= */
+if(location.search.includes('selftest')) setTimeout(()=>{
+  const out = [];
+  let failed = 0;
+  const ok = (name, cond, info='') => {
+    if(!cond) failed++;
+    out.push((cond ? 'PASS ' : 'FAIL ') + name + (info ? '  — ' + info : ''));
+  };
+  const held = colliders.splice(0, colliders.length);   // open track, no buildings
+  const reset = (u=0) => { S.carPos.set(0,0,0); S.carYaw = 0; S.u = u; S.v = S.r = S.steer = 0; };
+  const sim = (secs, ix, iz, hb=false) => {
+    keys.Space = hb;
+    for(let i=0;i<secs*60;i++) stepCar(1/60, ix, iz);
+    keys.Space = false;
+  };
+
+  reset(); sim(6, 0, -1);
+  ok('accelerates to a realistic speed in 6 s', S.u > 22 && S.u < 42, S.u.toFixed(1)+' m/s');
+
+  // at 25 m/s: ~261 N aero + ~217 N rolling ≈ 0.35 m/s², so ~1.4 m/s lost in 4 s
+  reset(25); sim(4, 0, 0);
+  ok('coasts down against drag + rolling resistance', 25 - S.u > 0.9 && 25 - S.u < 2.5,
+     'lost '+(25 - S.u).toFixed(2)+' m/s');
+
+  reset(25); sim(2, 0, 1);
+  ok('brakes hard from 25 m/s', S.u < 12, S.u.toFixed(1)+' m/s');
+
+  reset(25); sim(3, 0, 0);
+  ok('tracks straight with no steering input',
+     Math.abs(S.r) < 0.02 && Math.abs(S.v) < 0.2, 'r='+S.r.toFixed(4));
+
+  reset(15); sim(2, 1, 0);
+  const R = Math.abs(S.u / S.r);
+  ok('right steer yaws right', S.r > 0, 'r='+S.r.toFixed(3));
+  ok('turn radius is plausible', R > 7 && R < 80, R.toFixed(1)+' m');
+  ok('lateral grip stays inside the friction circle', Math.abs(S.u * S.r) < CAR.mu * G * 1.05,
+     (Math.abs(S.u*S.r)/G).toFixed(2)+' g');
+
+  reset(15); sim(2, 1, -1);
+  const gripSlip = Math.abs(S.v);
+  reset(15); sim(2, 1, -1, true);
+  ok('handbrake breaks the rear away', Math.abs(S.v) > gripSlip * 1.6,
+     gripSlip.toFixed(2)+' → '+Math.abs(S.v).toFixed(2)+' m/s lateral');
+
+  reset(); sim(3, 0, 1);
+  ok('reverses from a standstill', S.u < -1.5, S.u.toFixed(1)+' m/s');
+
+  // Gait: walk the skeleton through a full cycle and follow one sole with
+  // forward kinematics. A planted foot must sit on the ground and stay put
+  // while the body moves over it — foot-skating is the giveaway of a fake walk.
+  const J = player.userData;
+  const sole = (side) => {                       // sagittal FK, hip pivot → sole
+    const a1 = J['hip'+side].rotation.x;
+    const a2 = a1 + J['knee'+side].rotation.x;
+    const a3 = a2 + J['ank'+side].rotation.x;
+    const y = J.hips.position.y - HIPY - THIGH*Math.cos(a1) - SHIN*Math.cos(a2)
+              - ANKLE_H*Math.cos(a3);
+    const z = -THIGH*Math.sin(a1) - SHIN*Math.sin(a2) - ANKLE_H*Math.sin(a3);
+    return {y, z};
+  };
+  for(const [label, speed, run] of [['walk', 1.9, 0], ['run', 5.8, 1]]){
+    const N = 96, dt = strideLen(run) / speed / N;
+    let minY = Infinity, lift = 0, worstKnee = Infinity, slip = 0, n = 0, prev = null;
+    for(let i=0;i<N;i++){
+      poseWalk(J, i/N * Math.PI*2, 1, run, i*dt, 0, 0.1);
+      worstKnee = Math.min(worstKnee, J.kneeL.rotation.x, J.kneeR.rotation.x);
+      const R = sole('R'), L = sole('L');
+      minY = Math.min(minY, R.y, L.y);
+      lift = Math.max(lift, R.y);
+      if(R.y < 0.035){
+        if(prev !== null){ slip += Math.abs(R.z + speed*i*dt - prev)/dt; n++; }
+        prev = R.z + speed*i*dt;
+      } else prev = null;
+    }
+    const mean = slip / Math.max(1, n);
+    ok(label+': knees only flex backwards', worstKnee > -0.02, worstKnee.toFixed(3)+' rad');
+    ok(label+': feet never sink through the ground', minY > -0.01, minY.toFixed(3)+' m');
+    ok(label+': swing foot clears the ground', lift > 0.08, lift.toFixed(3)+' m');
+    ok(label+': planted foot does not skate', mean < speed * 0.25,
+       mean.toFixed(2)+' m/s of slip at '+speed+' m/s');
+  }
+  poseWalk(J, 0, 0, 0, 0, 0, 0);
+
+  colliders.push(...held);
+  reset(); S.carPos.set(-18, 0, 24); S.carYaw = Math.PI;
+  console.log('SELFTEST ' + (failed ? failed + ' FAILURES' : 'ALL PASS') + '\n' + out.join('\n'));
+}, 100);
+
+/* =========================================================================
+   19. Boot
    ========================================================================= */
 camera.position.set(26, 14, 62);
 camera.lookAt(0, 8, 0);
